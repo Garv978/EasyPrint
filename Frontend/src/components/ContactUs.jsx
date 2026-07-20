@@ -1,4 +1,39 @@
+import { submitFeedback } from "../services/FeedbackServices";
+import { useState } from "react";
+
 const ContactUs = () => {
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    message: "",
+  });
+
+  const [status, setStatus] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus("Submitting...");
+
+    try {
+      await submitFeedback(form);
+      setStatus("✅ Feedback submitted successfully!");
+      setForm({
+        firstName: "",
+        lastName: "",
+        email: "",
+        message: "",
+      });
+    } catch (err) {
+      console.error(err);
+      setStatus("❌ Failed to submit feedback.");
+    }
+  };
+
   return (
     <section
       id="contact-us"
@@ -21,16 +56,20 @@ const ContactUs = () => {
           </p>
         </div>
 
-        {/* Right Side - Smaller Form */}
+        {/* Right Side - Form */}
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8 w-full max-w-md mx-auto md:mx-0">
-          <form className="space-y-5">
-            {/* Name */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* Full Name */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Full Name
               </label>
               <input
                 type="text"
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
                 placeholder="Enter your name"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition"
               />
@@ -43,6 +82,9 @@ const ContactUs = () => {
               </label>
               <input
                 type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
                 placeholder="Enter your email"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition"
               />
@@ -55,6 +97,9 @@ const ContactUs = () => {
               </label>
               <textarea
                 rows="4"
+                name="message"
+                value={form.message}
+                onChange={handleChange}
                 placeholder="Write your message here..."
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none resize-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition"
               ></textarea>
@@ -67,6 +112,12 @@ const ContactUs = () => {
             >
               Submit
             </button>
+
+            {status && (
+              <p className="text-center text-sm text-slate-600">
+                {status}
+              </p>
+            )}
           </form>
         </div>
       </div>

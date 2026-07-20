@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import logo from "../assets/logo.png";
+import { useEffect, useRef, useState } from "react";
+
 import heroImg from "../assets/img1.png";
+import logo from "../assets/logo.png";
 
 function Hero() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -107,31 +108,31 @@ function Hero() {
 
         <div className="flex flex-col lg:flex-row items-center justify-between gap-20 w-full mt-24">
           <div className="max-md:px-4 lg:w-1/2">
-            <h1 className="text-5xl md:text-[54px] md:leading-[4.7rem] font-semibold max-w-lg bg-gradient-to-r from-black to-slate-600 bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-[54px] md:leading-[4.7rem] font-semibold max-w-lg bg-linear-to-r from-black to-slate-600 bg-clip-text text-transparent">
               Print Documents the Smarter Way
             </h1>
             <p className="text-sm/7 max-w-md mt-3 text-slate-500">
               No WhatsApp. No emails. No hassle. Just upload your files, choose
               your print preferences, and we'll take care of the rest.
             </p>
-            <div className="flex items-center text-sm border border-slate-300 rounded-md h-[54px] max-w-md focus-within:border-indigo-600 mt-6">
+            <div className="flex items-center text-sm border border-slate-300 rounded-md h-13.5 max-w-md focus-within:border-indigo-600 mt-6">
               <input
                 type="email"
                 placeholder="Enter the code"
                 className="rounded-md h-full px-4 w-full outline-none"
               />
-              <button className="px-8 h-[46px] mr-1 flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition">
+              <button className="px-8 h-11.5 mr-1 flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition">
                 Start
               </button>
             </div>
-            <button className="px-8 h-[46px] mr-1 mt-6 w-[450px] flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition">
+            <button className="px-8 h-11.5 mr-1 mt-6 w-112.5 flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition">
               Scan QR
             </button>
           </div>
           <div className="relative">
-            <div className="absolute inset-0 z-[-1] rounded-lg bg-gradient-to-r from-[#661FFF] via-[#FF1994] to-[#2D73FF] blur-2xl opacity-50"></div>
+            <div className="absolute inset-0 z-[-1] rounded-lg bg-linear-to-r from-[#661FFF] via-[#FF1994] to-[#2D73FF] blur-2xl opacity-50"></div>
             <img
-              className="max-w-md w-full max-h-[560px] rounded-[40px] max-md:px-3 md:mr-10"
+              className="max-w-md w-full max-h-140 rounded-[40px] max-md:px-3 md:mr-10"
               src={heroImg}
               alt="Print preview"
             />
