@@ -87,7 +87,10 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="relative bg-white py-16 px-6 overflow-hidden">
+    <section
+      id="how-it-works"
+      className="relative bg-white py-16 px-6 overflow-hidden"
+    >
       {/* Background Blur */}
       <div className="absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-100 blur-3xl opacity-60" />
 

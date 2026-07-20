@@ -47,7 +47,7 @@ const FeatureSection = () => {
         `}
       </style>
 
-      <section className="bg-white py-16 px-5">
+      <section id="features" className="bg-white py-16 px-5">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
           <button className="bg-blue-50 border border-blue-100 text-blue-600 text-xs font-medium px-5 py-2 rounded-full">
             ✨ Features

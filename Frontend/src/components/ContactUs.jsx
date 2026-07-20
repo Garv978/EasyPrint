@@ -1,8 +1,10 @@
 const ContactUs = () => {
   return (
-    <section className="bg-linear-to-b from-white to-blue-50 py-20">
+    <section
+      id="contact-us"
+      className="bg-linear-to-b from-white to-blue-50 py-20"
+    >
       <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-        
         {/* Left Side - Heading */}
         <div className="text-center md:text-left">
           <span className="inline-block px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">

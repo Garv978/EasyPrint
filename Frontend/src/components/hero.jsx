@@ -53,16 +53,16 @@ function Hero() {
             className="max-md:absolute max-md:h-full max-md:z-50 max-md:w-full max-md:top-0 max-md:-left-full transition-all duration-300 max-md:backdrop-blur max-md:bg-white/70 max-md:text-base flex flex-col md:flex-row items-center justify-center gap-8 font-medium"
           >
             <li onClick={closeNavbar} className="hover:text-slate-500">
-              <a href="#">How it works</a>
+              <a href="#how-it-works">How it works</a>
             </li>
             <li onClick={closeNavbar} className="hover:text-slate-500">
-              <a href="#">Features</a>
+              <a href="#features">Features</a>
             </li>
             <li onClick={closeNavbar} className="hover:text-slate-500">
               <a href="#">Pricing</a>
             </li>
             <li onClick={closeNavbar} className="hover:text-slate-500">
-              <a href="#">Contact Us</a>
+              <a href="#contact-us">Contact Us</a>
             </li>
 
             <button
@@ -125,8 +125,8 @@ function Hero() {
               </button>
             </div>
             <button className="px-8 h-[46px] mr-1 mt-6 w-[450px] flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition">
-                Scan QR
-              </button>
+              Scan QR
+            </button>
           </div>
           <div className="relative">
             <div className="absolute inset-0 z-[-1] rounded-lg bg-gradient-to-r from-[#661FFF] via-[#FF1994] to-[#2D73FF] blur-2xl opacity-50"></div>
