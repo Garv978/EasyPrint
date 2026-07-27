@@ -1,21 +1,25 @@
 import API from "../api";
 
 // Submit feedback
-export const submitFeedback = (feedbackData) => {
-  return API.post("/feedback", feedbackData);
+export const submitFeedback = async (feedbackData) => {
+  const res = await API.post("/feedback", feedbackData);
+  return res.data;
 };
 
 // Get all feedbacks
-export const getAllFeedbacks = () => {
-  return API.get("/feedback");
+export const getAllFeedbacks = async () => {
+  const res = await API.get("/feedback");
+  return res.data;
 };
 
 // Get single feedback
-export const getFeedback = (id) => {
-  return API.get(`/feedback/${id}`);
+export const getFeedback = async (id) => {
+  const res = await API.get(`/feedback/${id}`);
+  return res.data;
 };
 
 // Delete feedback
-export const deleteFeedback = (id) => {
-  return API.delete(`/feedback/${id}`);
+export const deleteFeedback = async (id) => {
+  const res = await API.delete(`/feedback/${id}`);
+  return res.data;
 };

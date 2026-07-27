@@ -1,12 +1,15 @@
 import './App.css'
-import { useState } from 'react'
-import { Routes, Route } from "react-router-dom";
+
+import { Route, Routes } from "react-router-dom";
 
 import ContactUs from './components/ContactUs'
 import FeatureSection from './components/FeatureSection'
 import Footer from './components/Footer'
 import Hero from './components/hero';
 import HowItWorks from './components/HowItWorks'
+import ShopDashboard from './components/shopDashboard';
+import UserPage from './components/UserPage';
+import { useState } from 'react'
 
 function App() {
   
@@ -14,14 +17,26 @@ function App() {
     <>
     <Routes>
       <Route path='/' element={
+        //LANDING PAGE
         <>
           <Hero  />
           <HowItWorks/>
           <FeatureSection/>
           <ContactUs/>
-          <Footer/>
+          <Footer/>          
         </>
+        //USER PAGE
+        
+
       }/>
+
+      <Route path="/user" element={
+          <UserPage></UserPage>
+        }/>
+
+        <Route path='/owner' element={
+          <ShopDashboard></ShopDashboard>
+        }/>
     </Routes>
      </>
   )
