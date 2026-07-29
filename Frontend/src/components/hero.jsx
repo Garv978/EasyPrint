@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 import heroImg from "../assets/img1.png";
 import logo from "../assets/logo.png";
+import QRScanner from "./QRscanner";
 
 function Hero() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const menuRef = useRef(null);
-
+  const navigate = useNavigate();
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -106,7 +108,7 @@ function Hero() {
           </button>
         </nav>
 
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-20 w-full mt-24">
+        <div className="flex ml-14 flex-col lg:flex-row items-center justify-between gap-20 w-full mt-24">
           <div className="max-md:px-4 lg:w-1/2">
             <h1 className="text-5xl md:text-[54px] md:leading-[4.7rem] font-semibold max-w-lg bg-linear-to-r from-black to-slate-600 bg-clip-text text-transparent">
               Print Documents the Smarter Way
@@ -125,7 +127,8 @@ function Hero() {
                 Start
               </button>
             </div>
-            <button className="px-8 h-11.5 mr-1 mt-6 w-112.5 flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition">
+            <button onClick={() => setIsScannerOpen(true)}
+            className="px-8 h-11.5 mr-1 mt-6 w-112.5 flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition">
               Scan QR
             </button>
           </div>
@@ -136,8 +139,22 @@ function Hero() {
               src={heroImg}
               alt="Print preview"
             />
+            <QRScanner
+              isOpen={isScannerOpen}
+              onClose={() => setIsScannerOpen(false)}
+              onScanSuccess={(shopCode) => {
+                setIsScannerOpen(false);
+
+                if (shopCode.startsWith("http")) {
+                  window.location.href = shopCode;
+                } else {
+                  navigate(`/user/${shopCode}`);
+                }
+              }}
+            />
           </div>
         </div>
+
       </section>
     </>
   );
