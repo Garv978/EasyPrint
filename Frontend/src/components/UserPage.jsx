@@ -1,5 +1,6 @@
 import { ArrowRight, ChevronDown, Copy, FileStack, FileText, Grid2x2, Image as ImageIcon, Layers2, Palette, RectangleHorizontal, RectangleVertical, Upload } from "lucide-react";
 import React, { useState } from "react";
+import API from "../api";
 
 export default function UserPage() {
   const [colorMode, setColorMode] = useState("bw");
@@ -11,6 +12,8 @@ export default function UserPage() {
   const [toPage, setToPage] = useState("");
   const [layout, setLayout] = useState("portrait");
   const [pagesPerSheet, setPagesPerSheet] = useState(1);
+  const [files,setFiles] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
   const handleCopyDropdown = (e) => {
     const val = e.target.value;
@@ -28,6 +31,70 @@ export default function UserPage() {
     setCustomCopies(val);
   };
 
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    if(selectedFiles.length === 0) return ;
+    setFiles(selectedFiles) ;
+  }
+
+  const handleUpload = async () => {
+    if (files.length === 0) {
+      alert("Please select at least one file.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+
+      // Append multiple files
+      files.forEach((file) => {
+        formData.append("documents", file);
+      });
+
+
+      // Append print options
+      formData.append("colorMode", colorMode);
+
+      formData.append(
+        "copies",
+        customCopies !== "" ? customCopies : copies
+      );
+
+      formData.append("sides", sides);
+
+      formData.append("layout", layout);
+
+      formData.append(
+        "pagesPerSheet",
+        pagesPerSheet
+      );
+
+
+      // Page range
+      formData.append("pageRange", pageRange);
+
+      if (pageRange === "custom") {
+        formData.append("fromPage", fromPage);
+        formData.append("toPage", toPage);
+      }
+      const response = await API.post(
+        "/user/file",
+        formData
+      );
+      console.log(response.data);
+      setUploadedFiles(response.data.files ?? []);
+      setFiles([]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleRemoveFile = (index) => {
+    setFiles((prevFiles) =>
+      prevFiles.filter((_, i) => i !== index)
+    );
+  };
+
   return (
     <div className="min-h-screen bg-emerald-50/60 p-6 flex justify-center">
       <div className="w-full max-w-5xl space-y-4">
@@ -39,10 +106,85 @@ export default function UserPage() {
             Print PDFs, Word files, images, certificates, resumes, assignments, and more.
           </p>
 
-          <button className="w-full border-2 border-dashed border-emerald-300 bg-emerald-50 hover:bg-emerald-100 transition-colors rounded-xl py-5 flex items-center justify-center gap-2 text-emerald-600 font-semibold">
-            <Upload size={18} />
-            Upload File
-          </button>
+
+        <input
+          type="file"
+          id="file-upload"
+          className="hidden"
+          multiple
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          onChange={handleFileChange}
+        />
+
+        <label
+          htmlFor="file-upload"
+          className="w-full border-2 border-dashed border-emerald-300 bg-emerald-50 hover:bg-emerald-100 transition-colors rounded-xl py-5 flex items-center justify-center gap-2 text-emerald-600 font-semibold cursor-pointer"
+        >
+          <Upload size={18} />
+          Upload File
+        </label>
+        {/* Selected Files Display */}
+        {files.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <p className="text-sm font-semibold text-gray-600">
+              Selected Files:
+            </p>
+
+            {files.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between bg-gray-50 border rounded-lg px-3 py-2 text-sm text-gray-700"
+              >
+                <div className="flex flex-col truncate">
+                  <span className="truncate max-w-[250px]">
+                    {file.name}
+                  </span>
+
+                  <span className="text-gray-400 text-xs">
+                    {(file.size / 1024).toFixed(2)} KB
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFile(index)}
+                  className="ml-3 text-red-500 hover:text-red-700 font-semibold"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {uploadedFiles.length > 0 && (
+          <div className="mt-5 space-y-2">
+            <p className="text-sm font-semibold text-emerald-600">
+              Uploaded Successfully:
+            </p>
+
+            {uploadedFiles.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-sm"
+              >
+                <span className="truncate max-w-[250px] text-gray-700">
+                  {file.name}
+                </span>
+
+                <span className="text-emerald-600 font-semibold">
+                  ✓ Uploaded
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={handleUpload}
+          className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 transition-colors rounded-xl py-3 text-white font-semibold"
+        >
+          Upload
+        </button>
 
           <p className="text-center text-gray-400 text-sm mt-4">
             Supported Formats: PDF, DOC, DOCX, JPG, PNG
