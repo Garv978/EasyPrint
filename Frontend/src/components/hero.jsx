@@ -17,6 +17,7 @@ function Hero() {
     setIsMenuOpen(false);
   };
 
+
   // Apply classes based on menu state
   useEffect(() => {
     if (menuRef.current) {
@@ -103,9 +104,26 @@ function Hero() {
             </svg>
           </button>
 
-          <button className="max-md:hidden px-6 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition rounded-full">
+          {/* <button className="max-md:hidden px-6 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition rounded-full">
             Login
-          </button>
+          </button> */}
+
+          <div className="relative group max-md:hidden">
+              <button className="px-6 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition rounded-full">
+                Login
+              </button>
+
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <button className="w-full px-4 py-3 text-left text-gray-700 hover:bg-indigo-50 rounded-lg">
+                  Login as User
+                </button>
+
+                <button onClick={() => navigate("/auth/owner")} className="w-full px-4 py-3 text-left text-gray-700 hover:bg-indigo-50 rounded-lg">
+                  Login as Owner
+                </button>
+              </div>
+          </div>
+
         </nav>
 
         <div className="flex ml-14 flex-col lg:flex-row items-center justify-between gap-20 w-full mt-24">

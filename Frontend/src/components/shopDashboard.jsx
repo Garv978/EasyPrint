@@ -55,7 +55,7 @@ const initialCustomers = [
   },
 ];
 
-export default function ShopDashboard() {
+export default function UserDashboard() {
   const [customers, setCustomers] = useState(initialCustomers);
   const [expandedCustomer, setExpandedCustomer] = useState(null);
 

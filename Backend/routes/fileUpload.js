@@ -49,6 +49,4 @@ fileUpload.post("/user/file",upload.array("documents", 20),async(req,res) => {
     }
 );
 
-
-
 module.exports = fileUpload;

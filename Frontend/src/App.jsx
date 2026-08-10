@@ -1,15 +1,13 @@
 import './App.css'
 
 import { Route, Routes } from "react-router-dom";
-
-import ContactUs from './components/ContactUs'
-import FeatureSection from './components/FeatureSection'
-import Footer from './components/Footer'
-import Hero from './components/hero';
-import HowItWorks from './components/HowItWorks'
-import ShopDashboard from './components/shopDashboard';
-import UserPage from './components/UserPage';
 import { useState } from 'react'
+
+import ShopDashboard from './components/shopDashboard';
+import ShopOwnerLogin from './components/shopOwnerLogin';
+import LandingPage from './pages/Landing';
+import UserDashboard from './pages/UserDashboard';
+import { User } from 'lucide-react';
 
 function App() {
   
@@ -17,26 +15,21 @@ function App() {
     <>
     <Routes>
       <Route path='/' element={
-        //LANDING PAGE
-        <>
-          <Hero  />
-          <HowItWorks/>
-          <FeatureSection/>
-          <ContactUs/>
-          <Footer/>          
-        </>
-        //USER PAGE
-        
-
+        <LandingPage></LandingPage>
       }/>
 
       <Route path="/user" element={
-          <UserPage></UserPage>
+          <UserDashboard></UserDashboard>
         }/>
 
-        <Route path='/owner' element={
+        <Route path='/dashboard' element={
           <ShopDashboard></ShopDashboard>
         }/>
+
+        <Route path='/auth/owner' element={
+          <ShopOwnerLogin></ShopOwnerLogin>
+        }/>
+
     </Routes>
      </>
   )
