@@ -3,6 +3,7 @@ import { Upload } from "lucide-react";
 export default function FileUploadSection({
   files,
   uploadedFiles,
+  isUploading,
   onFileChange,
   onRemoveFile,
   onUpload,
@@ -11,7 +12,7 @@ export default function FileUploadSection({
     <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-8">
       <h2 className="text-xl font-semibold text-gray-900">Ready to Print?</h2>
       <p className="text-gray-400 mt-1 mb-6">
-        Print PDFs, Word files, images, certificates, resumes, assignments, and
+        Print PDFs, images, certificates, resumes, assignments, and
         more.
       </p>
 
@@ -20,7 +21,7 @@ export default function FileUploadSection({
         id="file-upload"
         className="hidden"
         multiple
-        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+        accept=".pdf,.jpg,.jpeg,.png"
         onChange={onFileChange}
       />
 
@@ -51,6 +52,7 @@ export default function FileUploadSection({
               <button
                 type="button"
                 onClick={() => onRemoveFile(index)}
+                disabled={isUploading}
                 className="ml-3 text-red-500 hover:text-red-700 font-semibold"
               >
                 ✕
@@ -72,7 +74,7 @@ export default function FileUploadSection({
               className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-sm"
             >
               <span className="truncate max-w-[250px] text-gray-700">
-                {file.name}
+                {file.name || file}
               </span>
               <span className="text-emerald-600 font-semibold">✓ Uploaded</span>
             </div>
@@ -83,13 +85,14 @@ export default function FileUploadSection({
       <button
         type="button"
         onClick={onUpload}
+        disabled={isUploading}
         className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 transition-colors rounded-xl py-3 text-white font-semibold"
       >
-        Upload
+        {isUploading ? "Uploading..." : "Upload"}
       </button>
 
       <p className="text-center text-gray-400 text-sm mt-4">
-        Supported Formats: PDF, DOC, DOCX, JPG, PNG
+        Supported Formats: PDF, JPG, PNG
       </p>
     </div>
   );

@@ -3,6 +3,7 @@ import API from "../api";
 import FileUploadSection from "../components/FileUploadSection";
 import PrintOptionsSection from "../components/PrintOptionsSection";
 import ProductCardsSection from "../components/ProductCardsSection";
+import { useParams } from "react-router-dom";
 
 export default function UserDashboard() {
   const [colorMode, setColorMode] = useState("bw");
@@ -16,7 +17,9 @@ export default function UserDashboard() {
   const [pagesPerSheet, setPagesPerSheet] = useState(1);
   const [files, setFiles] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
 
+  const { shopCode } = useParams();
   const handleCopyDropdown = (e) => {
     const val = e.target.value;
     if (val === "custom") {
@@ -46,6 +49,7 @@ export default function UserDashboard() {
     }
 
     try {
+      setIsUploading(true);
       const formData = new FormData();
 
       files.forEach((file) => {
@@ -64,12 +68,14 @@ export default function UserDashboard() {
         formData.append("toPage", toPage);
       }
 
-      const response = await API.post("/user/file", formData);
-      console.log(response.data);
-      setUploadedFiles(response.data.files ?? []);
+      const response = await API.post(`/user/file/${shopCode}`, formData);
+      setUploadedFiles(response.data.fileNames || []);
       setFiles([]);
     } catch (error) {
-      console.log(error);
+      console.error("UPLOAD ERROR:", error);
+      console.error("SERVER ERROR:", error.response?.data);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -83,6 +89,7 @@ export default function UserDashboard() {
         <FileUploadSection
           files={files}
           uploadedFiles={uploadedFiles}
+          isUploading={isUploading}
           onFileChange={handleFileChange}
           onRemoveFile={handleRemoveFile}
           onUpload={handleUpload}

@@ -14,14 +14,34 @@ const jobSchema = new mongoose.Schema(
       required: true,
     },
 
-    documents: [
-      {
-        fileName: String,
-        fileUrl: String,
-        pages: Number,
-        fileSize: Number,
+      documents: [
+    {
+      fileName: {
+        type: String,
+        required: true,
       },
-    ],
+
+      cloudinaryPublicId: {
+        type: String,
+        required: true,
+      },
+
+      fileUrl: {
+        type: String,
+        required: true,
+      },
+
+      pages: {
+        type: Number,
+        default: 0,
+      },
+
+      fileSize: {
+        type: Number,
+        default: 0,
+      },
+    },
+  ],
 
     printOptions: {
       color: {
@@ -38,12 +58,14 @@ const jobSchema = new mongoose.Schema(
 
       pagesPerSheet: {
         type: Number,
+        enum: [1, 2, 4, 6, 9, 16],
         default: 1,
       },
 
       copies: {
         type: Number,
         default: 1,
+        min: 1,
       },
 
       sides: {
@@ -67,15 +89,31 @@ const jobSchema = new mongoose.Schema(
     totalPrice: {
       type: Number,
       default: 0,
+      min: 0,
     },
 
     status: {
       type: String,
       enum: [
         "Pending",
+        "Printing",
         "Completed",
+        "Failed",
+        "Cancelled",
       ],
       default: "Pending",
+    },
+
+    // Optional error information if printing fails
+    errorMessage: {
+      type: String,
+      default: "",
+    },
+
+    // When the temporary R2 files should expire
+    expiresAt: {
+      type: Date,
+      default: null,
     },
   },
   {

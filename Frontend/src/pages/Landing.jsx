@@ -4,10 +4,10 @@ import HowItWorks from "../components/HowItWorks";
 import ContactUs from "../components/ContactUs";
 import Footer from "../components/Footer";
 
-export default function LandingPage() {
+export default function LandingPage({loggedIn, onLogout}) {
     return (
         <>
-            <Hero></Hero>
+            <Hero loggedIn={loggedIn} onLogout={onLogout}></Hero>
             <HowItWorks></HowItWorks>
             <FeatureSection></FeatureSection>
             <ContactUs></ContactUs>

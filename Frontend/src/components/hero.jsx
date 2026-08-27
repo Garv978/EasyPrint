@@ -3,11 +3,16 @@ import { useNavigate } from "react-router-dom";
 import heroImg from "../assets/img1.png";
 import logo from "../assets/logo.png";
 import QRScanner from "./QRscanner";
+import GoogleAuth from "../pages/userLogin";
+import API from "../api";
+import toast from "react-hot-toast";
 
-function Hero() {
+function Hero({ loggedIn, onLogout }) {
+  const [shopCode, setshopCode] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const menuRef = useRef(null);
+  const isProcessingQR = useRef(false);
   const navigate = useNavigate();
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -17,6 +22,24 @@ function Hero() {
     setIsMenuOpen(false);
   };
 
+  const handleCode = async (shopCode) => {
+    try {
+      const response = await API.get("/checkShop", {
+        params: {
+          shopCode: shopCode,
+        },
+      });
+
+      if (!response.data.success) {
+        toast.error("No shop found");
+        return;
+      }
+
+      navigate(`/user/${shopCode}`);
+    } catch (error) {
+      toast.error("Something went very wrong");
+    }
+  };
 
   // Apply classes based on menu state
   useEffect(() => {
@@ -69,6 +92,45 @@ function Hero() {
               <a href="#contact-us">Contact Us</a>
             </li>
 
+            {loggedIn ? (
+              <li className="md:hidden">
+                <button
+                  onClick={() => {
+                    closeNavbar();
+                    onLogout();
+                  }}
+                  className="w-full rounded-md bg-indigo-600 px-6 py-3 text-white transition hover:bg-indigo-700"
+                >
+                  Logout
+                </button>
+              </li>
+            ) : (
+              <>
+                <li className="md:hidden w-full">
+                  <button
+                    onClick={() => {
+                      closeNavbar();
+                      navigate("/user/auth/google");
+                    }}
+                    className="w-full rounded-md bg-indigo-600 px-6 py-3 text-white transition hover:bg-indigo-700"
+                  >
+                    Login as User
+                  </button>
+                </li>
+                <li className="md:hidden w-full">
+                  <button
+                    onClick={() => {
+                      closeNavbar();
+                      navigate("/owner/auth/google");
+                    }}
+                    className="w-full rounded-md border border-indigo-600 px-6 py-3 text-indigo-700 transition hover:bg-indigo-50"
+                  >
+                    Login as Owner
+                  </button>
+                </li>
+              </>
+            )}
+
             <button
               onClick={closeNavbar}
               className="md:hidden bg-gray-800 hover:bg-black text-white p-2 rounded-md aspect-square font-medium transition"
@@ -108,25 +170,39 @@ function Hero() {
             Login
           </button> */}
 
-          <div className="relative group max-md:hidden">
+          {loggedIn ? (
+            <button
+              onClick={onLogout}
+              className="max-md:hidden px-6 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition rounded-full"
+            >
+              Logout
+            </button>
+          ) : (
+            <div className="relative group max-md:hidden">
               <button className="px-6 py-3 text-white bg-indigo-600 hover:bg-indigo-700 transition rounded-full">
                 Login
               </button>
 
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                <button className="w-full px-4 py-3 text-left text-gray-700 hover:bg-indigo-50 rounded-lg">
+                <button
+                  onClick={() => navigate("/user/auth/google")}
+                  className="w-full px-4 py-3 text-left text-gray-700 hover:bg-indigo-50 rounded-lg"
+                >
                   Login as User
                 </button>
 
-                <button onClick={() => navigate("/auth/owner")} className="w-full px-4 py-3 text-left text-gray-700 hover:bg-indigo-50 rounded-lg">
+                <button
+                  onClick={() => navigate("/owner/auth/google")}
+                  className="w-full px-4 py-3 text-left text-gray-700 hover:bg-indigo-50 rounded-lg"
+                >
                   Login as Owner
                 </button>
               </div>
-          </div>
-
+            </div>
+          )}
         </nav>
 
-        <div className="flex ml-14 flex-col lg:flex-row items-center justify-between gap-20 w-full mt-24">
+        <div className="flex md:ml-14 flex-col lg:flex-row items-center justify-between gap-20 w-full mt-24">
           <div className="max-md:px-4 lg:w-1/2">
             <h1 className="text-5xl md:text-[54px] md:leading-[4.7rem] font-semibold max-w-lg bg-linear-to-r from-black to-slate-600 bg-clip-text text-transparent">
               Print Documents the Smarter Way
@@ -140,13 +216,19 @@ function Hero() {
                 type="email"
                 placeholder="Enter the code"
                 className="rounded-md h-full px-4 w-full outline-none"
+                onChange={(e) => setshopCode(e.target.value)}
               />
-              <button className="px-8 h-11.5 mr-1 flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition">
+              <button
+                onClick={() => handleCode(shopCode)}
+                className="px-8 h-11.5 mr-1 flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition"
+              >
                 Start
               </button>
             </div>
-            <button onClick={() => setIsScannerOpen(true)}
-            className="px-8 h-11.5 mr-1 mt-6 w-112.5 flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition">
+            <button
+              onClick={() => setIsScannerOpen(true)}
+              className="px-8 h-11.5 mr-1 mt-6 w-full max-w-md flex items-center justify-center text-white rounded-md bg-indigo-600 hover:bg-indigo-700 transition"
+            >
               Scan QR
             </button>
           </div>
@@ -160,19 +242,20 @@ function Hero() {
             <QRScanner
               isOpen={isScannerOpen}
               onClose={() => setIsScannerOpen(false)}
-              onScanSuccess={(shopCode) => {
+              onScanSuccess={async (shopCode) => {
+                if (isProcessingQR.current) return;
+
+                isProcessingQR.current = true;
+
                 setIsScannerOpen(false);
 
-                if (shopCode.startsWith("http")) {
-                  window.location.href = shopCode;
-                } else {
-                  navigate(`/user/${shopCode}`);
-                }
+                await handleCode(shopCode);
+
+                isProcessingQR.current = false;
               }}
             />
           </div>
         </div>
-
       </section>
     </>
   );

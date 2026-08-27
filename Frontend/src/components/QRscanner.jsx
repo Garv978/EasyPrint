@@ -47,6 +47,7 @@ function QRScanner({ isOpen, onClose, onScanSuccess }) {
 
   const isMountedRef = useRef(true);
   const startLockRef = useRef(false); // prevents two concurrent start() calls (e.g. React StrictMode double-effect)
+  const scanLockRef = useRef(false);
 
   const stopScanner = useCallback(async () => {
     const scanner = scannerRef.current;
@@ -63,6 +64,17 @@ function QRScanner({ isOpen, onClose, onScanSuccess }) {
       scannerRef.current = null;
     }
   }, []);
+
+  const handleSuccess = (decodedText) => {
+    if (scanLockRef.current) return;
+    scanLockRef.current = true;
+    setStatus("scanned");
+
+    setTimeout(() => {
+      stopScanner();
+      onScanSuccess?.(decodedText);
+    }, 1200);
+  };
 
   const startScanner = useCallback(
     async (deviceId) => {
@@ -119,18 +131,11 @@ function QRScanner({ isOpen, onClose, onScanSuccess }) {
     [],
   );
 
-  const handleSuccess = (decodedText) => {
-    setStatus("scanned");
-
-    setTimeout(() => {
-      stopScanner();
-      onScanSuccess?.(decodedText);
-    }, 1200);
-  };
-
   useEffect(() => {
     isMountedRef.current = true;
     if (!isOpen) return;
+
+    scanLockRef.current = false;
 
     let cancelled = false;
 

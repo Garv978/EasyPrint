@@ -15,18 +15,24 @@ const shopOwnerSchema = new mongoose.Schema(
       uppercase: true,
       index: true,
     },
-
+    name: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
       unique: true,
-      trim: true,
+    },
+    googleId: {
+      type: String,
+      required: true,
+      unique: true,
     },
 
     phoneNo: {
       type: String, 
       required: true,
-      unique: true,
     },
 
     BWRate: {
@@ -40,6 +46,11 @@ const shopOwnerSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    role: {
+      type: String,
+      enum: ["user", "owner"],
+      default: "owner"
+    }
   },
   {
     timestamps: true,
