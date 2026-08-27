@@ -21,7 +21,97 @@ jobs:
           git fetch origin ${{ github.event.pull_request.base.ref }}
           git diff origin/${{ github.event.pull_request.base.ref }}...HEAD > pr.diff
 
-      - name: Check diff
+      - name: Run Gemini review
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          echo "PR diff:"
-          cat pr.diff
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          with open("pr.diff", "r", encoding="utf-8") as f:
+              diff = f.read()
+
+          if not diff.strip():
+              review = "No code changes found to review."
+          else:
+              prompt = f"""
+          You are an experienced software engineer performing a pull request review.
+
+          Review ONLY the code changes in the diff below.
+
+          Look for:
+          - Bugs
+          - Security vulnerabilities
+          - Incorrect logic
+          - Error handling problems
+          - Performance problems
+          - Breaking changes
+          - Serious maintainability problems
+
+          Ignore:
+          - Formatting
+          - Minor style preferences
+          - Things unrelated to the changed code
+
+          For every real issue you find, provide:
+          1. Severity: Critical / High / Medium / Low
+          2. File and approximate location
+          3. What is wrong
+          4. Why it matters
+          5. How to fix it
+
+          Do not invent problems. If the code looks good, say:
+          "No significant issues found."
+
+          PR DIFF:
+          {diff}
+          """
+
+              url = (
+                  "https://generativelanguage.googleapis.com/v1beta/"
+                  "models/gemini-2.5-flash-lite:generateContent"
+                  f"?key={os.environ['GEMINI_API_KEY']}"
+              )
+
+              data = {
+                  "contents": [
+                      {
+                          "parts": [
+                              {
+                                  "text": prompt
+                              }
+                          ]
+                      }
+                  ]
+              }
+
+              request = urllib.request.Request(
+                  url,
+                  data=json.dumps(data).encode("utf-8"),
+                  headers={"Content-Type": "application/json"},
+                  method="POST",
+              )
+
+              try:
+                  with urllib.request.urlopen(request) as response:
+                      result = json.loads(response.read().decode("utf-8"))
+
+                  review = result["candidates"][0]["content"]["parts"][0]["text"]
+
+              except Exception as e:
+                  print("Gemini request failed:", e)
+                  raise
+
+          with open("review.md", "w", encoding="utf-8") as f:
+              f.write("## 🤖 Gemini AI Code Review\n\n")
+              f.write(review)
+          PY
+
+      - name: Post review to PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body-file review.md
