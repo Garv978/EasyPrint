@@ -28,14 +28,16 @@ jobs:
           import json
           import os
           import urllib.request
+          import urllib.error
 
           with open("commit.diff", "r", encoding="utf-8") as f:
               diff = f.read()
 
           if not diff.strip():
-              review = "No code changes found to review."
-          else:
-              prompt = f"""
+              print("No code changes found to review.")
+              exit(0)
+
+          prompt = f"""
           You are an experienced software engineer reviewing a code commit.
 
           Review ONLY the changes in the diff below.
@@ -49,55 +51,76 @@ jobs:
           - Breaking changes
           - Serious maintainability problems
 
-          Ignore minor formatting and style issues.
+          Ignore:
+          - Formatting
+          - Minor style preferences
+          - Minor naming preferences
 
           Do not invent problems.
 
-          If you find an issue, explain:
-          - Severity
-          - File/location
-          - Problem
-          - Why it matters
-          - Suggested fix
+          For every real issue you find, provide:
+
+          1. Severity: Critical / High / Medium / Low
+          2. File and approximate location
+          3. What is wrong
+          4. Why it matters
+          5. Suggested fix
 
           If there are no significant problems, say:
+
           "No significant issues found."
 
-          DIFF:
+          Here is the commit diff:
+
           {diff}
           """
 
-              url = (
-                  "https://generativelanguage.googleapis.com/v1beta/"
-                  "models/gemini-2.5-flash-lite:generateContent"
-                  f"?key={os.environ['GEMINI_API_KEY']}"
-              )
+          url = (
+              "https://generativelanguage.googleapis.com/v1beta/"
+              "models/gemini-2.5-flash-lite:generateContent"
+          )
 
-              data = {
-                  "contents": [
-                      {
-                          "parts": [
-                              {
-                                  "text": prompt
-                              }
-                          ]
-                      }
-                  ]
-              }
+          data = {
+              "contents": [
+                  {
+                      "parts": [
+                          {
+                              "text": prompt
+                          }
+                      ]
+                  }
+              ]
+          }
 
-              request = urllib.request.Request(
-                  url,
-                  data=json.dumps(data).encode("utf-8"),
-                  headers={"Content-Type": "application/json"},
-                  method="POST",
-              )
+          request = urllib.request.Request(
+              url,
+              data=json.dumps(data).encode("utf-8"),
+              headers={
+                  "Content-Type": "application/json",
+                  "x-goog-api-key": os.environ["GEMINI_API_KEY"],
+              },
+              method="POST",
+          )
 
+          try:
               with urllib.request.urlopen(request) as response:
-                  result = json.loads(response.read().decode("utf-8"))
+                  result = json.loads(
+                      response.read().decode("utf-8")
+                  )
 
-              review = result["candidates"][0]["content"]["parts"][0]["text"]
+          except urllib.error.HTTPError as e:
+              print("Gemini API request failed.")
+              print("HTTP status:", e.code)
+              print("Response:")
+              print(e.read().decode("utf-8"))
+              raise
 
-          print("\n===== GEMINI AI CODE REVIEW =====\n")
+          review = result["candidates"][0]["content"]["parts"][0]["text"]
+
+          print()
+          print("===== GEMINI AI CODE REVIEW =====")
+          print()
           print(review)
-          print("\n===== END REVIEW =====\n")
+          print()
+          print("===== END REVIEW =====")
           PY
