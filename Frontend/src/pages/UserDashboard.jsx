@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import API from "../api";
 import FileUploadSection from "../components/FileUploadSection";
 import PrintOptionsSection from "../components/PrintOptionsSection";
 import ProductCardsSection from "../components/ProductCardsSection";
 import { useParams } from "react-router-dom";
-
+import { uploadFiles } from "../services/UserServices";
 export default function UserDashboard() {
   const [colorMode, setColorMode] = useState("bw");
   const [copies, setCopies] = useState(1);
@@ -68,7 +67,7 @@ export default function UserDashboard() {
         formData.append("toPage", toPage);
       }
 
-      const response = await API.post(`/user/file/${shopCode}`, formData);
+      const response = await uploadFiles(shopCode, formData);
       setUploadedFiles(response.data.fileNames || []);
       setFiles([]);
     } catch (error) {

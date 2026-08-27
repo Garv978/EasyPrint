@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PricingModel from "../components/PricingModel";
 import CustomerCard from "../components/CustomerCard";
-import API from "../api";
+import { getMyJobs } from "../services/OwnerServices";
 
 export default function ShopOwnerDashboard({ onLogout }) {
   const [customers, setCustomers] = useState([]);
@@ -25,7 +25,7 @@ export default function ShopOwnerDashboard({ onLogout }) {
     try {
       setLoading(true);
 
-      const response = await API.get("/get-my-jobs");
+      const response = await getMyJobs();
       const jobs = response.data?.jobs ?? [];
 
       const customerMap = {};

@@ -97,7 +97,7 @@ const generateShopCode = customAlphabet(
 );
 authRouter.post("/owner/auth/google", async (req, res) => {
     try {
-        const { token, shopdetails = {}, mode = "login" } = req.body;
+        const { token, shopDetails = {}, mode = "login" } = req.body;
 
         if (!token) {
             return res.status(400).json({
@@ -140,7 +140,7 @@ authRouter.post("/owner/auth/google", async (req, res) => {
         }
 
         if (!owner) {
-            const { shopName, phoneNo, BWRate, ColoredRate } = shopdetails;
+            const { shopName, phoneNo, BWRate, ColoredRate } = shopDetails;
 
             if (
                 typeof shopName !== "string" ||

@@ -1,19 +1,17 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import API from "../api";
+import { googleUserAuth } from "../services/UserServices";
 
 function GoogleAuth() {
   const navigate = useNavigate();
 
   const handleLogin = async (credentialResponse) => {
     try {
-      console.log("requested reached")
+      console.log("requested reached");
       toast.loading("Signing you in...", { id: "login" });
-      await API.post("/user/auth/google", {
-        token: credentialResponse.credential,
-      });
-      console.log("requested not found reached")
+      await googleUserAuth(credentialResponse.credential);
+      console.log("requested not found reached");
       window.dispatchEvent(new Event("authChange"));
 
       toast.success("Login successful 🎉", { id: "login" });
@@ -36,7 +34,7 @@ function GoogleAuth() {
           {/* Close button */}
           <button
             onClick={() => navigate("/")}
-            className="absolute top-4 right-4 !text-white hover:text-green-400 text-xl transition-colors"
+            className="absolute top-4 right-4  text-white! hover:text-green-400 text-xl transition-colors"
           >
             ✕
           </button>

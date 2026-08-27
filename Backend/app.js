@@ -14,7 +14,7 @@ const connectDB = require("./db/connect");
 const authRouter = require("./routes/authRoute");
 const feedbackRouter = require("./routes/feedbackRoutes");
 const fileUpload = require("./routes/fileUpload");
-const findShopRouter = require("./routes/findshopRoute");
+const findShopRouter = require("./routes/findShopRoute");
 const shopJobsRouter = require("./routes/getShopJobs");
 
 const port = process.env.PORT || 5000;

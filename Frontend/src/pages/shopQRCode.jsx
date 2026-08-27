@@ -9,13 +9,11 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-function ShopQRCode({
-  owner
-}) {
+function ShopQRCode({ owner }) {
   const [copied, setCopied] = useState(false);
-  const shopCode = owner.shopCode ;
-  const shopName = owner.shopName ;
-  const ownerName = owner.name ; 
+  const shopCode = owner.shopCode;
+  const shopName = owner.shopName;
+  const ownerName = owner.name;
   if (!shopCode) return null;
 
   // -----------------------------
@@ -70,24 +68,14 @@ function ShopQRCode({
       // --------------------------------
       // BLUE HEADER
       // --------------------------------
-      const gradient = ctx.createLinearGradient(
-        0,
-        0,
-        canvas.width,
-        0
-      );
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
 
       gradient.addColorStop(0, "#2563eb");
       gradient.addColorStop(1, "#4f46e5");
 
       ctx.fillStyle = gradient;
 
-      ctx.fillRect(
-        0,
-        0,
-        canvas.width,
-        150
-      );
+      ctx.fillRect(0, 0, canvas.width, 150);
 
       // --------------------------------
       // SHOP ICON
@@ -103,11 +91,7 @@ function ShopQRCode({
       ctx.font = "bold 40px Arial";
       ctx.textAlign = "center";
 
-      ctx.fillText(
-        shopName.charAt(0).toUpperCase(),
-        85,
-        90
-      );
+      ctx.fillText(shopName.charAt(0).toUpperCase(), 85, 90);
 
       // --------------------------------
       // SHOP NAME
@@ -117,19 +101,11 @@ function ShopQRCode({
       ctx.font = "bold 38px Arial";
       ctx.textAlign = "left";
 
-      ctx.fillText(
-        shopName,
-        150,
-        70
-      );
+      ctx.fillText(shopName, 150, 70);
 
       ctx.font = "22px Arial";
 
-      ctx.fillText(
-        "Scan to visit our shop",
-        150,
-        105
-      );
+      ctx.fillText("Scan to visit our shop", 150, 105);
 
       // --------------------------------
       // MAIN WHITE CARD
@@ -137,13 +113,7 @@ function ShopQRCode({
       ctx.fillStyle = "#ffffff";
 
       ctx.beginPath();
-      ctx.roundRect(
-        70,
-        190,
-        1060,
-        540,
-        30
-      );
+      ctx.roundRect(70, 190, 1060, 540, 30);
 
       ctx.fill();
 
@@ -153,26 +123,14 @@ function ShopQRCode({
       ctx.fillStyle = "#eff6ff";
 
       ctx.beginPath();
-      ctx.roundRect(
-        120,
-        235,
-        430,
-        430,
-        25
-      );
+      ctx.roundRect(120, 235, 430, 430, 25);
 
       ctx.fill();
 
       // --------------------------------
       // QR IMAGE
       // --------------------------------
-      ctx.drawImage(
-        qrImage,
-        145,
-        260,
-        380,
-        380
-      );
+      ctx.drawImage(qrImage, 145, 260, 380, 380);
 
       // --------------------------------
       // RIGHT DETAILS
@@ -183,31 +141,19 @@ function ShopQRCode({
       ctx.fillStyle = "#64748b";
       ctx.font = "18px Arial";
 
-      ctx.fillText(
-        "SHOP QR CODE",
-        620,
-        275
-      );
+      ctx.fillText("SHOP QR CODE", 620, 275);
 
       // Shop name
       ctx.fillStyle = "#111827";
       ctx.font = "bold 40px Arial";
 
-      ctx.fillText(
-        shopName,
-        620,
-        330
-      );
+      ctx.fillText(shopName, 620, 330);
 
       // Owner
       ctx.fillStyle = "#64748b";
       ctx.font = "23px Arial";
 
-      ctx.fillText(
-        `Owner: ${ownerName}`,
-        620,
-        375
-      );
+      ctx.fillText(`Owner: ${ownerName}`, 620, 375);
 
       // Divider
       ctx.strokeStyle = "#e2e8f0";
@@ -224,47 +170,27 @@ function ShopQRCode({
       ctx.fillStyle = "#64748b";
       ctx.font = "18px Arial";
 
-      ctx.fillText(
-        "SHOP CODE",
-        620,
-        455
-      );
+      ctx.fillText("SHOP CODE", 620, 455);
 
       // Shop code
       ctx.fillStyle = "#2563eb";
       ctx.font = "bold 32px Arial";
 
-      ctx.fillText(
-        shopCode,
-        620,
-        500
-      );
+      ctx.fillText(shopCode, 620, 500);
 
       // Instructions
       ctx.fillStyle = "#475569";
       ctx.font = "20px Arial";
 
-      ctx.fillText(
-        "Open your phone camera",
-        620,
-        555
-      );
+      ctx.fillText("Open your phone camera", 620, 555);
 
-      ctx.fillText(
-        "and scan this QR code",
-        620,
-        585
-      );
+      ctx.fillText("and scan this QR code", 620, 585);
 
       // Security
       ctx.fillStyle = "#16a34a";
       ctx.font = "bold 18px Arial";
 
-      ctx.fillText(
-        "✓ Secure & Unique Shop QR",
-        620,
-        635
-      );
+      ctx.fillText("✓ Secure & Unique Shop QR", 620, 635);
 
       // --------------------------------
       // DOWNLOAD
@@ -273,9 +199,7 @@ function ShopQRCode({
 
       link.download = `${shopName}-Shop-QR.png`;
 
-      link.href = canvas.toDataURL(
-        "image/png"
-      );
+      link.href = canvas.toDataURL("image/png");
 
       link.click();
     };
@@ -287,7 +211,6 @@ function ShopQRCode({
 
   return (
     <div className="w-full px-3 sm:px-4 mt-12">
-
       {/* MAIN CARD */}
 
       <div
@@ -303,23 +226,12 @@ function ShopQRCode({
           shadow-lg
         "
       >
-
         {/* HEADER */}
 
         <div
-          className="
-            bg-gradient-to-r
-            from-blue-600
-            to-indigo-600
-            px-4
-            py-5
-            sm:px-6
-            lg:px-8
-          "
+          className="bg-linear-to-r from-blue-600 to-indigo-600 px-4 py-5 sm:px-6 lg:px-8"
         >
-
           <div className="flex items-center gap-3">
-
             <div
               className="
                 flex
@@ -337,7 +249,6 @@ function ShopQRCode({
             </div>
 
             <div className="min-w-0">
-
               <h2
                 className="
                   truncate
@@ -359,11 +270,8 @@ function ShopQRCode({
               >
                 Your Shop QR Code
               </p>
-
             </div>
-
           </div>
-
         </div>
 
         {/* CONTENT */}
@@ -381,7 +289,6 @@ function ShopQRCode({
             lg:p-8
           "
         >
-
           {/* ========================= */}
           {/* LEFT - QR */}
           {/* ========================= */}
@@ -396,11 +303,10 @@ function ShopQRCode({
               lg:w-[45%]
             "
           >
-
             <div
               className="
                 w-full
-                max-w-[300px]
+                max-w-75
                 rounded-2xl
                 border
                 border-blue-100
@@ -410,7 +316,6 @@ function ShopQRCode({
                 sm:p-4
               "
             >
-
               <div
                 className="
                   flex
@@ -422,7 +327,6 @@ function ShopQRCode({
                   p-2
                 "
               >
-
                 <QRCodeCanvas
                   id="shop-qr"
                   value={shopCode}
@@ -434,19 +338,13 @@ function ShopQRCode({
                     max-w-full
                   "
                 />
-
               </div>
-
             </div>
 
             {/* QR LABEL */}
 
             <div className="mt-4 flex items-center gap-2">
-
-              <ScanLine
-                size={18}
-                className="text-blue-600"
-              />
+              <ScanLine size={18} className="text-blue-600" />
 
               <p
                 className="
@@ -457,9 +355,7 @@ function ShopQRCode({
               >
                 Scan to access shop
               </p>
-
             </div>
-
           </div>
 
           {/* ========================= */}
@@ -475,11 +371,9 @@ function ShopQRCode({
               lg:w-[55%]
             "
           >
-
             {/* Title */}
 
             <div>
-
               <p
                 className="
                   text-xs
@@ -495,7 +389,7 @@ function ShopQRCode({
               <h3
                 className="
                   mt-1
-                  break-words
+                  wrap-break-word
                   text-2xl
                   font-bold
                   text-gray-900
@@ -514,7 +408,6 @@ function ShopQRCode({
               >
                 {ownerName}
               </p>
-
             </div>
 
             {/* Divider */}
@@ -531,7 +424,6 @@ function ShopQRCode({
             {/* SHOP CODE */}
 
             <div>
-
               <p
                 className="
                   text-xs
@@ -559,7 +451,6 @@ function ShopQRCode({
                   py-3
                 "
               >
-
                 <p
                   className="
                     min-w-0
@@ -586,20 +477,13 @@ function ShopQRCode({
                   "
                   title="Copy shop code"
                 >
-
                   {copied ? (
-                    <Check
-                      size={18}
-                      className="text-green-600"
-                    />
+                    <Check size={18} className="text-green-600" />
                   ) : (
                     <Copy size={18} />
                   )}
-
                 </button>
-
               </div>
-
             </div>
 
             {/* INSTRUCTIONS */}
@@ -612,9 +496,7 @@ function ShopQRCode({
                 p-4
               "
             >
-
               <div className="flex gap-3">
-
                 <ScanLine
                   size={20}
                   className="
@@ -625,7 +507,6 @@ function ShopQRCode({
                 />
 
                 <div>
-
                   <p
                     className="
                       text-sm
@@ -645,15 +526,11 @@ function ShopQRCode({
                       sm:text-sm
                     "
                   >
-                    Customers can scan this QR code
-                    with their phone camera to quickly
-                    access your shop.
+                    Customers can scan this QR code with their phone camera to
+                    quickly access your shop.
                   </p>
-
                 </div>
-
               </div>
-
             </div>
 
             {/* SECURITY */}
@@ -668,14 +545,8 @@ function ShopQRCode({
                 text-gray-400
               "
             >
-
-              <ShieldCheck
-                size={16}
-                className="text-green-500"
-              />
-
+              <ShieldCheck size={16} className="text-green-500" />
               QR code is unique to your shop
-
             </div>
 
             {/* DOWNLOAD */}
@@ -703,19 +574,12 @@ function ShopQRCode({
                 sm:text-base
               "
             >
-
               <Download size={19} />
-
               Download Shop QR
-
             </button>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
   );
 }

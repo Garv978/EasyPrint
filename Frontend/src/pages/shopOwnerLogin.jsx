@@ -2,7 +2,7 @@ import { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import API from "../api";
+import { googleOwnerAuth } from "../services/OwnerServices";
 
 const ShopOwnerLogin = () => {
   const [step, setStep] = useState(1);
@@ -66,19 +66,14 @@ const ShopOwnerLogin = () => {
 
       const { shopName, phoneNo, BWRate, ColoredRate } = formData;
 
-      const shopdetails = {
+      const shopDetails = {
         shopName: shopName.trim(),
         phoneNo: phoneNo.trim(),
         BWRate: Number(BWRate),
         ColoredRate: Number(ColoredRate),
       };
 
-      await API.post("/owner/auth/google", {
-        token: credentialResponse.credential,
-        shopdetails,
-        mode,
-        role: "owner",
-      });
+      await googleOwnerAuth(credentialResponse.credential, shopDetails, mode);
 
       window.dispatchEvent(new Event("authChange"));
 
@@ -127,7 +122,7 @@ const ShopOwnerLogin = () => {
       {/* MODAL */}
       <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
         {/* Top gradient line */}
-        <div className="h-1.5 w-full shrink-0 bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600" />
+        <div className="h-1.5 w-full shrink-0 bg-linear-to-r from-cyan-500 via-sky-500 to-blue-600" />
 
         {/* Close button */}
         <button
@@ -293,7 +288,7 @@ const ShopOwnerLogin = () => {
                 <button
                   type="button"
                   onClick={handleContinue}
-                  className="mt-2 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-700 hover:to-sky-600 hover:shadow-xl active:translate-y-0"
+                  className="mt-2 flex w-full items-center justify-center rounded-2xl bg-linear-to-r from-blue-600 to-sky-500 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-700 hover:to-sky-600 hover:shadow-xl active:translate-y-0"
                 >
                   Continue
                   <span className="ml-2 text-lg">→</span>
@@ -333,7 +328,7 @@ const ShopOwnerLogin = () => {
             {step === 2 && (
               <div>
                 {/* GOOGLE LOGIN CARD */}
-                <div className="rounded-3xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white p-6">
+                <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-slate-50 to-white p-6">
                   {/* Google Icon */}
                   <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-md ring-1 ring-slate-100">
                     <svg width="27" height="27" viewBox="0 0 24 24">
