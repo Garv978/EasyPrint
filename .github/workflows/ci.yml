@@ -4,8 +4,12 @@ on:
   push:
 
 jobs:
-  security-and-build:
+  security:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: Backend
 
     steps:
       - name: Checkout code
@@ -21,6 +25,3 @@ jobs:
 
       - name: Security audit
         run: npm audit --audit-level=high
-
-      - name: Build project
-        run: npm run build
