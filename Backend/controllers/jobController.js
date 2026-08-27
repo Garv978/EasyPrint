@@ -1,0 +1,144 @@
+const Job = require("../models/job");
+const ShopOwner = require("../models/shopOwner");
+
+// Check if shop exists
+const checkShop = async (req, res) => {
+  try {
+    const { shopCode } = req.query;
+
+    const shop = await ShopOwner.findOne({ shopCode });
+
+    if (!shop) {
+      return res.status(404).json({
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+    });
+  } catch (error) {
+    console.error("CHECK SHOP ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+// Get jobs belonging to logged-in owner
+const getMyJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find({
+      shopId: req.user.ownerId,
+    })
+      .populate("userId", "name email")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      jobs,
+    });
+  } catch (error) {
+    console.error("GET MY JOBS ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+const updatePricing = async (req, res) => {
+  try {
+    const { BWRate, ColoredRate } = req.body;
+
+    if (BWRate === undefined || ColoredRate === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Both BWRate and ColoredRate are required",
+      });
+    }
+
+    if (BWRate < 0 || ColoredRate < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Prices cannot be negative",
+      });
+    }
+
+    const shopOwner = await ShopOwner.findByIdAndUpdate(
+      req.user.ownerId,
+      {
+        BWRate,
+        ColoredRate,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!shopOwner) {
+      return res.status(404).json({
+        success: false,
+        message: "Shop owner not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Pricing updated successfully",
+      pricing: {
+        BWRate: shopOwner.BWRate,
+        ColoredRate: shopOwner.ColoredRate,
+      },
+    });
+
+  } catch (error) {
+    console.error("UPDATE PRICING ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+const getPricing = async (req, res) => {
+  try {
+    const shopOwner = await ShopOwner.findById(req.user.ownerId)
+      .select("BWRate ColoredRate");
+
+    if (!shopOwner) {
+      return res.status(404).json({
+        success: false,
+        message: "Shop owner not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      pricing: {
+        BWRate: shopOwner.BWRate,
+        ColoredRate: shopOwner.ColoredRate,
+      },
+    });
+
+  } catch (error) {
+    console.error("GET PRICING ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+module.exports = {
+  checkShop,
+  getMyJobs,
+  updatePricing,
+  getPricing,
+};

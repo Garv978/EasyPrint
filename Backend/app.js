@@ -14,9 +14,7 @@ const connectDB = require("./db/connect");
 const authRouter = require("./routes/authRoute");
 const feedbackRouter = require("./routes/feedbackRoutes");
 const fileUpload = require("./routes/fileUpload");
-const findShopRouter = require("./routes/findShopRoute");
-const shopJobsRouter = require("./routes/getShopJobs");
-
+const jobRouter = require("./routes/jobRoutes");
 const port = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -46,9 +44,7 @@ app.use(cookieParser());
 app.use("/api/v1", feedbackRouter);
 app.use("", fileUpload);
 app.use("", authRouter);
-app.use("", findShopRouter);
-app.use("", shopJobsRouter);
-
+app.use("",jobRouter);
 
 // --------------------
 // HTTP Server

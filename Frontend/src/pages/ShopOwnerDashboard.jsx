@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import PricingModel from "../components/PricingModel";
 import CustomerCard from "../components/CustomerCard";
-import { getMyJobs } from "../services/OwnerServices";
+import {
+  getPricing,
+  getMyJobs,
+  updatePricing,
+} from "../services/OwnerServices";
 
 export default function ShopOwnerDashboard({ onLogout }) {
   const [customers, setCustomers] = useState([]);
@@ -10,16 +14,14 @@ export default function ShopOwnerDashboard({ onLogout }) {
 
   // Pricing
   const [draftBw, setDraftBw] = useState(2);
-  const [draftColor, setDraftColor] = useState(8);
+  const [draftColor, setDraftColor] = useState(6);
 
   const [priceBw, setPriceBw] = useState(2);
-  const [priceColor, setPriceColor] = useState(8);
+  const [priceColor, setPriceColor] = useState(6);
 
   const [justSaved, setJustSaved] = useState(false);
 
-  const isDirty =
-    draftBw !== priceBw ||
-    draftColor !== priceColor;
+  const isDirty = draftBw !== priceBw || draftColor !== priceColor;
 
   const fetchJobs = async () => {
     try {
@@ -51,10 +53,7 @@ export default function ShopOwnerDashboard({ onLogout }) {
             fileName: document.fileName,
             pages: document.pages ?? 0,
 
-            color:
-              job.printOptions?.color === "Color"
-                ? "color"
-                : "bw",
+            color: job.printOptions?.color === "Color" ? "color" : "bw",
 
             copies: job.printOptions?.copies ?? 1,
 
@@ -84,48 +83,64 @@ export default function ShopOwnerDashboard({ onLogout }) {
     }
   };
 
+  const fetchPricing = async () => {
+    try {
+      const response = await getPricing();
+
+      const BWRate = response.data?.pricing?.BWRate;
+      const ColoredRate = response.data?.pricing?.ColoredRate;
+
+      if (BWRate !== undefined) {
+        setPriceBw(BWRate);
+        setDraftBw(BWRate);
+      }
+
+      if (ColoredRate !== undefined) {
+        setPriceColor(ColoredRate);
+        setDraftColor(ColoredRate);
+      }
+    } catch (error) {
+      console.error("GET PRICING ERROR:", error);
+      console.error("SERVER ERROR:", error.response?.data);
+    }
+  };
+
   useEffect(() => {
     fetchJobs();
+    fetchPricing();
   }, []);
 
-  
-  const handleSave = () => {
-    setPriceBw(draftBw);
-    setPriceColor(draftColor);
+  const handleSave = async () => {
+    try {
+      await updatePricing(draftBw, draftColor);
 
-    setJustSaved(true);
+      setPriceBw(draftBw);
+      setPriceColor(draftColor);
 
-    setTimeout(() => {
-      setJustSaved(false);
-    }, 2000);
+      setJustSaved(true);
+
+      setTimeout(() => {
+        setJustSaved(false);
+      }, 2000);
+    } catch (error) {
+      console.error("UPDATE PRICING ERROR:", error);
+      console.error("SERVER ERROR:", error.response?.data);
+    }
   };
 
   const docPrice = (doc) => {
-    const rate =
-      doc.color === "color"
-        ? priceColor
-        : priceBw;
+    const rate = doc.color === "color" ? priceColor : priceBw;
 
-    return (
-      doc.pages *
-      doc.copies *
-      rate
-    );
+    return doc.pages * doc.copies * rate;
   };
 
   const toggleExpand = (customerId) => {
-    setExpandedCustomer(
-      expandedCustomer === customerId
-        ? null
-        : customerId
-    );
+    setExpandedCustomer(expandedCustomer === customerId ? null : customerId);
   };
 
   const deleteCustomer = (customerId) => {
     setCustomers((prev) =>
-      prev.filter(
-        (customer) => customer.id !== customerId
-      )
+      prev.filter((customer) => customer.id !== customerId),
     );
 
     if (expandedCustomer === customerId) {
@@ -136,7 +151,6 @@ export default function ShopOwnerDashboard({ onLogout }) {
   return (
     <div className="min-h-screen bg-emerald-50/50 p-6">
       <div className="max-w-4xl mx-auto space-y-5">
-
         {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -181,7 +195,6 @@ export default function ShopOwnerDashboard({ onLogout }) {
         {/* Customers */}
         {!loading && (
           <div className="space-y-3">
-
             {customers.length === 0 && (
               <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm p-10 text-center text-gray-400 text-sm">
                 No orders yet.
@@ -189,8 +202,7 @@ export default function ShopOwnerDashboard({ onLogout }) {
             )}
 
             {customers.map((customer) => {
-              const isOpen =
-                expandedCustomer === customer.id;
+              const isOpen = expandedCustomer === customer.id;
 
               return (
                 <CustomerCard
@@ -203,10 +215,8 @@ export default function ShopOwnerDashboard({ onLogout }) {
                 />
               );
             })}
-
           </div>
         )}
-
       </div>
     </div>
   );
