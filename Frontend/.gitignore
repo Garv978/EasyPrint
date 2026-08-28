@@ -45,7 +45,6 @@ coverage/
 .parcel-cache/
 .eslintcache
 .stylelintcache
-.vite/
 
 # ================================
 # OS files
@@ -93,6 +92,7 @@ uploads/*
 # ================================
 # Certificates / private keys
 # ================================
+certs/
 *.pem
 *.key
 *.crt

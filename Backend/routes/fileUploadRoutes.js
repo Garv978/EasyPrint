@@ -1,4 +1,4 @@
-```js
+
 const express = require("express");
 
 const fileUpload = express.Router();
@@ -18,4 +18,3 @@ fileUpload.post(
 );
 
 module.exports = fileUpload;
-```

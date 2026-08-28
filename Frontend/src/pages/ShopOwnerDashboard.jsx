@@ -68,7 +68,8 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
             chargedPages: document.chargedPages ?? 0,
             price: document.price ?? 0,
 
-            color: job.printOptions?.color === "Color" ? "Color" : "Black & White",
+            color:
+              job.printOptions?.color === "Color" ? "Color" : "Black & White",
             colorToken: job.printOptions?.color === "Color" ? "color" : "bw",
 
             copies: job.printOptions?.copies ?? 1,
@@ -132,7 +133,6 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
   // Load dashboard only after owner is available
   useEffect(() => {
     if (!ownerId) {
-      setLoading(false);
       return;
     }
 

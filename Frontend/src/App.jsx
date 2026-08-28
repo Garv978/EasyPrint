@@ -36,7 +36,7 @@ function App() {
         setOwner(null);
         setLoggedIn(false);
       }
-    } catch (error) {
+    } catch {
       setUser(null);
       setOwner(null);
       setLoggedIn(false);
@@ -58,12 +58,51 @@ function App() {
   };
 
   useEffect(() => {
-    checkAuth();
+    let cancelled = false;
 
-    window.addEventListener("authChange", checkAuth);
+    const checkInitialAuth = async () => {
+      try {
+        const response = await API.get("/auth/me");
+
+        if (cancelled) return;
+
+        if (response.data.role === "user") {
+          setUser(response.data.user);
+          setOwner(null);
+          setLoggedIn(true);
+        } else if (response.data.role === "owner") {
+          setOwner(response.data.owner);
+          setUser(null);
+          setLoggedIn(true);
+        } else {
+          setUser(null);
+          setOwner(null);
+          setLoggedIn(false);
+        }
+      } catch {
+        if (cancelled) return;
+
+        setUser(null);
+        setOwner(null);
+        setLoggedIn(false);
+      } finally {
+        if (!cancelled) {
+          setAuthChecked(true);
+        }
+      }
+    };
+
+    const handleAuthChange = () => {
+      checkAuth();
+    };
+
+    checkInitialAuth();
+
+    window.addEventListener("authChange", handleAuthChange);
 
     return () => {
-      window.removeEventListener("authChange", checkAuth);
+      cancelled = true;
+      window.removeEventListener("authChange", handleAuthChange);
     };
   }, []);
 
@@ -81,10 +120,7 @@ function App() {
           owner ? (
             <OwnerPage owner={owner} onLogout={handleLogout} />
           ) : (
-            <LandingPage
-              loggedIn={loggedIn}
-              onLogout={handleLogout}
-            />
+            <LandingPage loggedIn={loggedIn} onLogout={handleLogout} />
           )
         }
       />
@@ -93,11 +129,7 @@ function App() {
       <Route
         path="/user/:shopCode"
         element={
-          user ? (
-            <UserDashboard user={user} />
-          ) : (
-            <Navigate to="/" replace />
-          )
+          user ? <UserDashboard user={user} /> : <Navigate to="/" replace />
         }
       />
 
@@ -106,10 +138,7 @@ function App() {
         path="/owner/dashboard"
         element={
           owner ? (
-            <ShopOwnerDashboard
-              owner={owner}
-              onLogout={handleLogout}
-            />
+            <ShopOwnerDashboard owner={owner} onLogout={handleLogout} />
           ) : (
             <Navigate to="/owner/auth/google" replace />
           )
@@ -117,16 +146,10 @@ function App() {
       />
 
       {/* OWNER LOGIN */}
-      <Route
-        path="/owner/auth/google"
-        element={<ShopOwnerLogin />}
-      />
+      <Route path="/owner/auth/google" element={<ShopOwnerLogin />} />
 
       {/* USER LOGIN */}
-      <Route
-        path="/user/auth/google"
-        element={<GoogleAuth />}
-      />
+      <Route path="/user/auth/google" element={<GoogleAuth />} />
 
       {/* OWNER QR */}
       <Route
@@ -141,10 +164,7 @@ function App() {
       />
 
       {/* FALLBACK */}
-      <Route
-        path="*"
-        element={<Navigate to="/" replace />}
-      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

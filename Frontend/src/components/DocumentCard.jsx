@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Copy,
   FileStack,
@@ -14,24 +14,61 @@ import {
 } from "lucide-react";
 
 import { updatePrintStatus } from "../services/OwnerServices";
-import { connectQzAndListPrinters, printPdfDocument } from "../services/qzService";
+import {
+  connectQzAndListPrinters,
+  printPdfDocument,
+} from "../services/qzService";
 
 const getButtonState = (state) => {
   switch (state) {
     case "connecting":
-      return { label: "Connecting...", disabled: true, className: "bg-yellow-500 hover:bg-yellow-600" };
+      return {
+        label: "Connecting...",
+        disabled: true,
+        className: "bg-yellow-500 hover:bg-yellow-600",
+      };
+
     case "printing":
-      return { label: "Printing...", disabled: true, className: "bg-emerald-600 hover:bg-emerald-700" };
+      return {
+        label: "Printing...",
+        disabled: true,
+        className: "bg-emerald-600 hover:bg-emerald-700",
+      };
+
     case "success":
-      return { label: "Printed", disabled: true, className: "bg-green-600 hover:bg-green-700" };
+      return {
+        label: "Printed",
+        disabled: true,
+        className: "bg-green-600 hover:bg-green-700",
+      };
+
     case "failed":
-      return { label: "Retry print", disabled: false, className: "bg-red-500 hover:bg-red-600" };
+      return {
+        label: "Retry print",
+        disabled: false,
+        className: "bg-red-500 hover:bg-red-600",
+      };
+
     case "not-installed":
-      return { label: "QZ not ready", disabled: true, className: "bg-gray-400 hover:bg-gray-400" };
+      return {
+        label: "QZ not ready",
+        disabled: true,
+        className: "bg-gray-400 hover:bg-gray-400",
+      };
+
     case "printer-unavailable":
-      return { label: "No printers", disabled: true, className: "bg-gray-400 hover:bg-gray-400" };
+      return {
+        label: "No printers",
+        disabled: true,
+        className: "bg-gray-400 hover:bg-gray-400",
+      };
+
     default:
-      return { label: "Print", disabled: false, className: "bg-emerald-500 hover:bg-emerald-600" };
+      return {
+        label: "Print",
+        disabled: false,
+        className: "bg-emerald-500 hover:bg-emerald-600",
+      };
   }
 };
 
@@ -41,51 +78,29 @@ export default function DocumentCard({ doc, idx }) {
   const [selectedPrinter, setSelectedPrinter] = useState("");
   const [printerError, setPrinterError] = useState("");
 
-  const loadPrinters = async () => {
-    try {
-      setPrinterState("connecting");
-      setPrinterError("");
-
-      const { printers } = await connectQzAndListPrinters();
-
-      if (!printers.length) {
-        setAvailablePrinters([]);
-        setSelectedPrinter("");
-        setPrinterState("printer-unavailable");
-        return;
-      }
-
-      setAvailablePrinters(printers);
-      setSelectedPrinter((current) => current || printers[0]);
-      setPrinterState("idle");
-    } catch (error) {
-      console.error("QZ printer load failed:", error);
-      setAvailablePrinters([]);
-      setSelectedPrinter("");
-      setPrinterState("not-installed");
-      setPrinterError(error.message || "QZ Tray is not running or the browser could not connect.");
-    }
-  };
-
-  useEffect(() => {
-    loadPrinters();
-  }, []);
-
   const handlePrint = async () => {
     try {
       setPrinterError("");
+      setPrinterState("connecting");
 
-      if (!selectedPrinter) {
+      let printerName = selectedPrinter;
+
+      // Connect to QZ Tray and discover printers if no printer is selected.
+      if (!printerName) {
         const { printers } = await connectQzAndListPrinters();
 
         if (!printers.length) {
+          setAvailablePrinters([]);
+          setSelectedPrinter("");
           setPrinterState("printer-unavailable");
           setPrinterError("No local printers were found.");
           return;
         }
 
+        printerName = printers[0];
+
         setAvailablePrinters(printers);
-        setSelectedPrinter(printers[0]);
+        setSelectedPrinter(printerName);
       }
 
       setPrinterState("printing");
@@ -95,7 +110,7 @@ export default function DocumentCard({ doc, idx }) {
       }
 
       await printPdfDocument({
-        printerName: selectedPrinter,
+        printerName,
         fileUrl: doc.fileUrl,
         copies: doc.copies,
         sides: doc.sides,
@@ -111,11 +126,16 @@ export default function DocumentCard({ doc, idx }) {
       setPrinterState("success");
     } catch (error) {
       console.error("PRINT ERROR:", error);
+
       setPrinterState("failed");
       setPrinterError(error.message || "Printing failed.");
 
       if (doc.jobId) {
-        await updatePrintStatus(doc.jobId, "Failed", error.message || "Printing failed.");
+        await updatePrintStatus(
+          doc.jobId,
+          "Failed",
+          error.message || "Printing failed.",
+        );
       }
     }
   };
@@ -164,10 +184,17 @@ export default function DocumentCard({ doc, idx }) {
 
               <span className="flex items-center gap-1">
                 {doc.layout === "landscape" ? (
-                  <RectangleHorizontal size={12} className="text-emerald-400" />
+                  <RectangleHorizontal
+                    size={12}
+                    className="text-emerald-400"
+                  />
                 ) : (
-                  <RectangleVertical size={12} className="text-emerald-400" />
+                  <RectangleVertical
+                    size={12}
+                    className="text-emerald-400"
+                  />
                 )}
+
                 {doc.layout === "landscape" ? "Landscape" : "Portrait"}
               </span>
 
@@ -191,7 +218,16 @@ export default function DocumentCard({ doc, idx }) {
             disabled={buttonState.disabled}
             className={`flex items-center gap-1.5 text-sm font-medium text-white px-3 py-2 rounded-xl transition-colors ${buttonState.className}`}
           >
-            {printerState === "printing" ? <Loader2 size={14} className="animate-spin" /> : printerState === "success" ? <Check size={14} /> : printerState === "failed" ? <AlertCircle size={14} /> : <Printer size={14} />}
+            {printerState === "printing" ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : printerState === "success" ? (
+              <Check size={14} />
+            ) : printerState === "failed" ? (
+              <AlertCircle size={14} />
+            ) : (
+              <Printer size={14} />
+            )}
+
             {buttonState.label}
           </button>
         </div>
@@ -200,6 +236,7 @@ export default function DocumentCard({ doc, idx }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <span className="font-medium text-gray-600">Printer:</span>
+
           {availablePrinters.length > 0 ? (
             <select
               value={selectedPrinter}
@@ -214,13 +251,19 @@ export default function DocumentCard({ doc, idx }) {
             </select>
           ) : (
             <span className="text-gray-400">
-              {printerState === "not-installed" ? "QZ Tray not running" : printerState === "printer-unavailable" ? "Printer unavailable" : "Waiting for printer"}
+              {printerState === "not-installed"
+                ? "QZ Tray not running"
+                : printerState === "printer-unavailable"
+                  ? "Printer unavailable"
+                  : "Click Print to connect"}
             </span>
           )}
         </div>
 
         {doc.errorMessage && (
-          <span className="text-xs text-red-500">Previous error: {doc.errorMessage}</span>
+          <span className="text-xs text-red-500">
+            Previous error: {doc.errorMessage}
+          </span>
         )}
       </div>
 
