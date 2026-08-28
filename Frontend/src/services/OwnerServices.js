@@ -20,6 +20,13 @@ export const updatePricing = async (BWRate, ColoredRate) => {
   });
 };
 
+export const updatePrintStatus = async (jobId, status, errorMessage = "") => {
+  return API.patch(`/jobs/${jobId}/print-status`, {
+    status,
+    errorMessage,
+  });
+};
+
 export const googleOwnerAuth = async (
   credential,
   shopDetails,
