@@ -40,7 +40,7 @@ function App() {
           setOwner(response.data.owner);
           setUser(null);
         }
-      } catch (error) {
+      } catch {
         setLoggedIn(false);
         setUser(null);
         setOwner(null);

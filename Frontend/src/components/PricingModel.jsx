@@ -1,13 +1,10 @@
 import { Check, FileText, IndianRupee, Palette, Settings } from "lucide-react";
-import React from "react";
 
 export default function PricingModel({
   draftBw,
   setDraftBw,
   draftColor,
   setDraftColor,
-  priceBw,
-  priceColor,
   justSaved,
   onSave,
   isDirty,

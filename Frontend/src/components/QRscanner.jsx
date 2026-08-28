@@ -223,7 +223,7 @@ function QRScanner({ isOpen, onClose, onScanSuccess }) {
       {/* Camera feed target — html5-qrcode injects its <video> here */}
       <div
         id={containerId}
-        className="absolute inset-0 h-full w-full [&_video]:!object-cover [&_video]:!h-full [&_video]:!w-full"
+        className="absolute inset-0 h-full w-full [&_video]:object-cover! [&_video]:h-full! [&_video]:w-full!"
       />
 
       {/* Dimmed mask with a clear viewfinder cutout, GPay-style */}
@@ -258,7 +258,7 @@ function QRScanner({ isOpen, onClose, onScanSuccess }) {
 
           {/* Scanning line — soft and subtle */}
           <div
-            className="absolute inset-x-3 h-[2px] rounded-full animate-qr-scan-line"
+            className="absolute inset-x-3 h-0.5 rounded-full animate-qr-scan-line"
             style={{
               background:
                 "linear-gradient(90deg, transparent, rgba(255,255,255,0.95) 20%, rgba(255,255,255,0.95) 80%, transparent)",
@@ -269,7 +269,7 @@ function QRScanner({ isOpen, onClose, onScanSuccess }) {
       )}
 
       {/* Top controls */}
-      <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 pt-5 pb-10 bg-gradient-to-b from-black/60 to-transparent">
+      <div className="absolute top-0 inset-x-0 flex items-center justify-between px-4 pt-5 pb-10 bg-linear-to-b from-black/60 to-transparent">
         <button
           onClick={handleClose}
           aria-label="Close scanner"

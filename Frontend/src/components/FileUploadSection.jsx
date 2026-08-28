@@ -43,7 +43,7 @@ export default function FileUploadSection({
               className="flex items-center justify-between bg-gray-50 border rounded-lg px-3 py-2 text-sm text-gray-700"
             >
               <div className="flex flex-col truncate">
-                <span className="truncate max-w-[250px]">{file.name}</span>
+                <span className="truncate max-w-62.5">{file.name}</span>
                 <span className="text-gray-400 text-xs">
                   {(file.size / 1024).toFixed(2)} KB
                 </span>
@@ -73,7 +73,7 @@ export default function FileUploadSection({
               key={`${file.name}-${index}`}
               className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-sm"
             >
-              <span className="truncate max-w-[250px] text-gray-700">
+              <span className="truncate max-w-62.5 text-gray-700">
                 {file.name || file}
               </span>
               <span className="text-emerald-600 font-semibold">✓ Uploaded</span>

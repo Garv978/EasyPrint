@@ -64,14 +64,23 @@ const io = new Server(server, {
   },
 });
 
+app.set("io", io);
+
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
+
+  socket.on("join-shop", (shopId) => {
+    socket.join(`shop-${shopId}`);
+
+    console.log(
+      `Socket ${socket.id} joined shop-${shopId}`
+    );
+  });
 
   socket.on("disconnect", () => {
     console.log("Socket disconnected:", socket.id);
   });
 });
-
 
 // --------------------
 // Start server

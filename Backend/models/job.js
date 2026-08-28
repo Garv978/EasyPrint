@@ -14,35 +14,47 @@ const jobSchema = new mongoose.Schema(
       required: true,
     },
 
-      documents: [
-    {
-      fileName: {
-        type: String,
-        required: true,
-      },
+    documents: [
+      {
+        fileName: {
+          type: String,
+          required: true,
+        },
 
-      cloudinaryPublicId: {
-        type: String,
-        required: true,
-      },
+        cloudinaryPublicId: {
+          type: String,
+          required: true,
+        },
 
-      fileUrl: {
-        type: String,
-        required: true,
-      },
+        fileUrl: {
+          type: String,
+          required: true,
+        },
 
-      pages: {
-        type: Number,
-        default: 0,
-      },
+        pages: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
 
-      fileSize: {
-        type: Number,
-        default: 0,
-      },
-    },
-  ],
+        chargedPages: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
 
+        price: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+
+        fileSize: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
     printOptions: {
       color: {
         type: String,
@@ -94,13 +106,7 @@ const jobSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: [
-        "Pending",
-        "Printing",
-        "Completed",
-        "Failed",
-        "Cancelled",
-      ],
+      enum: ["Pending", "Printing", "Completed", "Failed", "Cancelled"],
       default: "Pending",
     },
 
@@ -118,7 +124,7 @@ const jobSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Job", jobSchema);

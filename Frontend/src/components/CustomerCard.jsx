@@ -1,16 +1,13 @@
 import { ChevronDown, Trash2 } from "lucide-react";
-import React from "react";
 import DocumentCard from "./DocumentCard";
 
 export default function CustomerCard({
   customer,
-  docPrice,
   isOpen,
   toggleExpand,
   deleteCustomer,
 }) {
-  const customerTotal = customer.documents.reduce((s, d) => s + docPrice(d), 0);
-
+  const customerTotal = customer.documents.reduce((sum, document) => sum + document.price,0,);
   return (
     <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
       {/* Row */}
@@ -64,7 +61,6 @@ export default function CustomerCard({
               key={doc.id}
               doc={doc}
               idx={idx}
-              docPrice={docPrice}
             />
           ))}
         </div>

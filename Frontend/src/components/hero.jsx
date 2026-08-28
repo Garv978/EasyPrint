@@ -3,12 +3,11 @@ import { useNavigate } from "react-router-dom";
 import heroImg from "../assets/img1.png";
 import logo from "../assets/logo.png";
 import QRScanner from "./QRscanner";
-import GoogleAuth from "../pages/userLogin";
 import API from "../api";
 import toast from "react-hot-toast";
 
 function Hero({ loggedIn, onLogout }) {
-  const [shopCode, setshopCode] = useState("");
+  const [shopCode, setShopCode] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const menuRef = useRef(null);
@@ -36,7 +35,7 @@ function Hero({ loggedIn, onLogout }) {
       }
 
       navigate(`/user/${shopCode}`);
-    } catch (error) {
+    } catch {
       toast.error("Something went very wrong");
     }
   };
@@ -216,7 +215,7 @@ function Hero({ loggedIn, onLogout }) {
                 type="email"
                 placeholder="Enter the code"
                 className="rounded-md h-full px-4 w-full outline-none"
-                onChange={(e) => setshopCode(e.target.value)}
+                onChange={(e) => setShopCode(e.target.value)}
               />
               <button
                 onClick={() => handleCode(shopCode)}

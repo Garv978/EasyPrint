@@ -85,11 +85,11 @@ function OwnerHero({ owner, onLogout }) {
       <section className="relative overflow-hidden">
 
         {/* Background */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(99,102,241,0.12),_transparent_40%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.12),transparent_40%)]" />
 
         <div className="relative max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[650px] py-20">
+          <div className="grid lg:grid-cols-2 gap-16 items-center min-h-162.5 py-20">
 
             {/* LEFT */}
             <div>

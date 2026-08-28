@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import FileUploadSection from "../components/FileUploadSection";
 import PrintOptionsSection from "../components/PrintOptionsSection";
 import ProductCardsSection from "../components/ProductCardsSection";

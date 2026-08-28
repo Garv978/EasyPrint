@@ -36,6 +36,11 @@ const getMyJobs = async (req, res) => {
       .populate("userId", "name email")
       .sort({ createdAt: -1 });
 
+    // Never cache the owner's current jobs
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+
     return res.status(200).json({
       success: true,
       jobs,

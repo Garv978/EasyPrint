@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PricingModel from "../components/PricingModel";
 import CustomerCard from "../components/CustomerCard";
 import {
@@ -7,7 +7,9 @@ import {
   updatePricing,
 } from "../services/OwnerServices";
 
-export default function ShopOwnerDashboard({ onLogout }) {
+import socket from "../socket";
+
+export default function ShopOwnerDashboard({ onLogout, owner }) {
   const [customers, setCustomers] = useState([]);
   const [expandedCustomer, setExpandedCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,9 @@ export default function ShopOwnerDashboard({ onLogout }) {
 
   const isDirty = draftBw !== priceBw || draftColor !== priceColor;
 
-  const fetchJobs = async () => {
+  const ownerId = owner?._id;
+
+  const fetchJobs = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -34,7 +38,6 @@ export default function ShopOwnerDashboard({ onLogout }) {
 
       jobs.forEach((job) => {
         const user = job.userId;
-
         const userId = user?._id;
 
         if (!userId) return;
@@ -52,8 +55,11 @@ export default function ShopOwnerDashboard({ onLogout }) {
             id: `${job._id}-${document._id}`,
             fileName: document.fileName,
             pages: document.pages ?? 0,
+            chargedPages: document.chargedPages ?? 0,
+            price: document.price ?? 0,
 
-            color: job.printOptions?.color === "Color" ? "color" : "bw",
+            color:
+              job.printOptions?.color === "Color" ? "color" : "bw",
 
             copies: job.printOptions?.copies ?? 1,
 
@@ -81,9 +87,9 @@ export default function ShopOwnerDashboard({ onLogout }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchPricing = async () => {
+  const fetchPricing = useCallback(async () => {
     try {
       const response = await getPricing();
 
@@ -103,12 +109,43 @@ export default function ShopOwnerDashboard({ onLogout }) {
       console.error("GET PRICING ERROR:", error);
       console.error("SERVER ERROR:", error.response?.data);
     }
-  };
-
-  useEffect(() => {
-    fetchJobs();
-    fetchPricing();
   }, []);
+
+  // Load dashboard only after owner is available
+  useEffect(() => {
+    if (!ownerId) {
+      setLoading(false);
+      return;
+    }
+
+    const loadDashboard = async () => {
+      await fetchJobs();
+      await fetchPricing();
+    };
+
+    loadDashboard();
+  }, [ownerId, fetchJobs, fetchPricing]);
+
+  // Join the shop's Socket.IO room
+  useEffect(() => {
+    if (!ownerId) return;
+
+    console.log("OWNER ID:", ownerId);
+    console.log("Joining shop room:", `shop-${ownerId}`);
+
+    socket.emit("join-shop", ownerId);
+
+    const handleNewJob = () => {
+      console.log("🔥 NEW JOB RECEIVED");
+      fetchJobs();
+    };
+
+    socket.on("new-job", handleNewJob);
+
+    return () => {
+      socket.off("new-job", handleNewJob);
+    };
+  }, [ownerId, fetchJobs]);
 
   const handleSave = async () => {
     try {
@@ -128,14 +165,10 @@ export default function ShopOwnerDashboard({ onLogout }) {
     }
   };
 
-  const docPrice = (doc) => {
-    const rate = doc.color === "color" ? priceColor : priceBw;
-
-    return doc.pages * doc.copies * rate;
-  };
-
   const toggleExpand = (customerId) => {
-    setExpandedCustomer(expandedCustomer === customerId ? null : customerId);
+    setExpandedCustomer(
+      expandedCustomer === customerId ? null : customerId,
+    );
   };
 
   const deleteCustomer = (customerId) => {
@@ -178,8 +211,6 @@ export default function ShopOwnerDashboard({ onLogout }) {
           setDraftBw={setDraftBw}
           draftColor={draftColor}
           setDraftColor={setDraftColor}
-          priceBw={priceBw}
-          priceColor={priceColor}
           justSaved={justSaved}
           onSave={handleSave}
           isDirty={isDirty}
@@ -208,7 +239,6 @@ export default function ShopOwnerDashboard({ onLogout }) {
                 <CustomerCard
                   key={customer.id}
                   customer={customer}
-                  docPrice={docPrice}
                   isOpen={isOpen}
                   toggleExpand={toggleExpand}
                   deleteCustomer={deleteCustomer}
