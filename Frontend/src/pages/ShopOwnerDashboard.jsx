@@ -32,7 +32,12 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
       setLoading(true);
 
       const response = await getMyJobs();
+
+      console.log("GET MY JOBS RESPONSE:", response.data);
+
       const jobs = response.data?.jobs ?? [];
+
+      console.log("JOBS:", jobs);
 
       const customerMap = {};
 
@@ -40,7 +45,10 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
         const user = job.userId;
         const userId = user?._id;
 
-        if (!userId) return;
+        if (!userId) {
+          console.error("❌ JOB HAS NO USER:", job);
+          return;
+        }
 
         if (!customerMap[userId]) {
           customerMap[userId] = {
@@ -58,8 +66,7 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
             chargedPages: document.chargedPages ?? 0,
             price: document.price ?? 0,
 
-            color:
-              job.printOptions?.color === "Color" ? "color" : "bw",
+            color: job.printOptions?.color === "Color" ? "color" : "bw",
 
             copies: job.printOptions?.copies ?? 1,
 
@@ -83,7 +90,13 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
       setCustomers(Object.values(customerMap));
     } catch (error) {
       console.error("GET JOBS ERROR:", error);
+      console.error("STATUS:", error.response?.status);
       console.error("SERVER ERROR:", error.response?.data);
+
+      if (error.response?.status === 401) {
+        // Tell the main auth system that the session is invalid.
+        window.dispatchEvent(new Event("authChange"));
+      }
     } finally {
       setLoading(false);
     }
@@ -130,17 +143,13 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
   useEffect(() => {
     if (!ownerId) return;
 
-    console.log("OWNER ID:", ownerId);
-    console.log("Joining shop room:", `shop-${ownerId}`);
-
-    socket.emit("join-shop", ownerId);
-
     const handleNewJob = () => {
-      console.log("🔥 NEW JOB RECEIVED");
       fetchJobs();
     };
 
     socket.on("new-job", handleNewJob);
+
+    socket.emit("join-shop", ownerId);
 
     return () => {
       socket.off("new-job", handleNewJob);
@@ -166,9 +175,7 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
   };
 
   const toggleExpand = (customerId) => {
-    setExpandedCustomer(
-      expandedCustomer === customerId ? null : customerId,
-    );
+    setExpandedCustomer(expandedCustomer === customerId ? null : customerId);
   };
 
   const deleteCustomer = (customerId) => {

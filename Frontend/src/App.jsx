@@ -1,7 +1,8 @@
 import "./App.css";
 
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+
 import ShopOwnerDashboard from "./pages/ShopOwnerDashboard";
 import ShopOwnerLogin from "./pages/shopOwnerLogin";
 import LandingPage from "./pages/Landing";
@@ -9,6 +10,7 @@ import GoogleAuth from "./pages/userLogin";
 import UserDashboard from "./pages/UserDashboard";
 import OwnerPage from "./pages/ownerPage";
 import ShopQRCode from "./pages/shopQRCode";
+
 import API from "./api";
 
 function App() {
@@ -17,73 +19,133 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
+  const checkAuth = async () => {
+    try {
+      const response = await API.get("/auth/me");
+
+      if (response.data.role === "user") {
+        setUser(response.data.user);
+        setOwner(null);
+        setLoggedIn(true);
+      } else if (response.data.role === "owner") {
+        setOwner(response.data.owner);
+        setUser(null);
+        setLoggedIn(true);
+      } else {
+        setUser(null);
+        setOwner(null);
+        setLoggedIn(false);
+      }
+    } catch (error) {
+      setUser(null);
+      setOwner(null);
+      setLoggedIn(false);
+    } finally {
+      setAuthChecked(true);
+    }
+  };
+
   const handleLogout = async () => {
-    await API.post("/auth/logout");
-    setLoggedIn(false);
-    setUser(null);
-    setOwner(null);
+    try {
+      await API.post("/auth/logout");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setLoggedIn(false);
+      setUser(null);
+      setOwner(null);
+    }
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await API.get("/auth/me");
-
-        if (response.data.role === "user") {
-          setLoggedIn(true);
-          setUser(response.data.user);
-          setOwner(null);
-        }
-
-        if (response.data.role === "owner") {
-          setLoggedIn(true);
-          setOwner(response.data.owner);
-          setUser(null);
-        }
-      } catch {
-        setLoggedIn(false);
-        setUser(null);
-        setOwner(null);
-      } finally {
-        setAuthChecked(true);
-      }
-    };
-
-    window.addEventListener("authChange", checkAuth);
     checkAuth();
 
-    return () => window.removeEventListener("authChange", checkAuth);
+    window.addEventListener("authChange", checkAuth);
+
+    return () => {
+      window.removeEventListener("authChange", checkAuth);
+    };
   }, []);
 
-  if (!authChecked) return null;
+  // Don't render routes until authentication is checked
+  if (!authChecked) {
+    return null;
+  }
 
   return (
-    <>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            owner !== null ? (
-              <OwnerPage  owner={owner} onLogout={handleLogout} />
-            ) : (
-              <LandingPage loggedIn={loggedIn} onLogout={handleLogout} />
-            )
-          }
-        />
-        <Route
-          path="/user/:shopCode"
-          element={<UserDashboard user={user}></UserDashboard>}
-        />
-        <Route
-          path="/owner/dashboard"
-          element={<ShopOwnerDashboard owner={owner} onLogout={handleLogout} />}
-        />
-        {/* create the routes for the login externally */}
-        <Route path="/owner/auth/google" element={<ShopOwnerLogin></ShopOwnerLogin>} />
-        <Route path="/user/auth/google" element={<GoogleAuth></GoogleAuth>} />
-        <Route path="/owner/qr" element={<ShopQRCode owner={owner}></ShopQRCode>}/>
-      </Routes>
-    </>
+    <Routes>
+      {/* HOME */}
+      <Route
+        path="/"
+        element={
+          owner ? (
+            <OwnerPage owner={owner} onLogout={handleLogout} />
+          ) : (
+            <LandingPage
+              loggedIn={loggedIn}
+              onLogout={handleLogout}
+            />
+          )
+        }
+      />
+
+      {/* USER DASHBOARD */}
+      <Route
+        path="/user/:shopCode"
+        element={
+          user ? (
+            <UserDashboard user={user} />
+          ) : (
+            <Navigate to="/" replace />
+          )
+        }
+      />
+
+      {/* OWNER DASHBOARD */}
+      <Route
+        path="/owner/dashboard"
+        element={
+          owner ? (
+            <ShopOwnerDashboard
+              owner={owner}
+              onLogout={handleLogout}
+            />
+          ) : (
+            <Navigate to="/owner/auth/google" replace />
+          )
+        }
+      />
+
+      {/* OWNER LOGIN */}
+      <Route
+        path="/owner/auth/google"
+        element={<ShopOwnerLogin />}
+      />
+
+      {/* USER LOGIN */}
+      <Route
+        path="/user/auth/google"
+        element={<GoogleAuth />}
+      />
+
+      {/* OWNER QR */}
+      <Route
+        path="/owner/qr"
+        element={
+          owner ? (
+            <ShopQRCode owner={owner} />
+          ) : (
+            <Navigate to="/owner/auth/google" replace />
+          )
+        }
+      />
+
+      {/* FALLBACK */}
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
+      />
+    </Routes>
   );
 }
 
