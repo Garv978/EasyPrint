@@ -13,7 +13,7 @@ const cookieParser = require("cookie-parser");
 const connectDB = require("./db/connect");
 const authRouter = require("./routes/authRoute");
 const feedbackRouter = require("./routes/feedbackRoutes");
-const fileUpload = require("./routes/fileUpload");
+const fileUploadRouter = require("./routes/fileUploadRoutes");
 const jobRouter = require("./routes/jobRoutes");
 const port = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
@@ -42,7 +42,7 @@ app.use(cookieParser());
 // --------------------
 
 app.use("/api/v1", feedbackRouter);
-app.use("", fileUpload);
+app.use("", fileUploadRouter);
 app.use("", authRouter);
 app.use("",jobRouter);
 
