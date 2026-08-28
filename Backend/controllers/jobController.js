@@ -141,9 +141,63 @@ const getPricing = async (req, res) => {
   }
 };
 
+const updatePrintStatus = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const { status, errorMessage = "" } = req.body;
+    const validStatuses = ["Printing", "Completed", "Failed"];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "A valid print status is required.",
+      });
+    }
+
+    const job = await Job.findOne({
+      _id: jobId,
+      shopId: req.user.ownerId,
+    });
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found for this shop owner.",
+      });
+    }
+
+    job.status = status;
+    job.errorMessage = status === "Failed" ? (errorMessage || "Print failed.") : "";
+    await job.save();
+
+    const io = req.app.get("io");
+
+    if (io) {
+      io.to(`shop-${job.shopId}`).emit("job-status-update", {
+        jobId: job._id,
+        status: job.status,
+        errorMessage: job.errorMessage,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      job,
+    });
+  } catch (error) {
+    console.error("UPDATE PRINT STATUS ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
 module.exports = {
   checkShop,
   getMyJobs,
   updatePricing,
   getPricing,
+  updatePrintStatus,
 };

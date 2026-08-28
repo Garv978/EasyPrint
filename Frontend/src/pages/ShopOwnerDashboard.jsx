@@ -61,14 +61,18 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
         (job.documents ?? []).forEach((document) => {
           customerMap[userId].documents.push({
             id: `${job._id}-${document._id}`,
+            jobId: job._id,
+            documentId: document._id,
             fileName: document.fileName,
             pages: document.pages ?? 0,
             chargedPages: document.chargedPages ?? 0,
             price: document.price ?? 0,
 
-            color: job.printOptions?.color === "Color" ? "color" : "bw",
+            color: job.printOptions?.color === "Color" ? "Color" : "Black & White",
+            colorToken: job.printOptions?.color === "Color" ? "color" : "bw",
 
             copies: job.printOptions?.copies ?? 1,
+            sides: job.printOptions?.sides ?? "Single-sided",
 
             layout:
               job.printOptions?.layout === "Landscape"
@@ -83,6 +87,7 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
             status: job.status,
             totalPrice: job.totalPrice,
             fileUrl: document.fileUrl,
+            errorMessage: job.errorMessage || "",
           });
         });
       });
@@ -147,12 +152,18 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
       fetchJobs();
     };
 
+    const handleJobStatusUpdate = () => {
+      fetchJobs();
+    };
+
     socket.on("new-job", handleNewJob);
+    socket.on("job-status-update", handleJobStatusUpdate);
 
     socket.emit("join-shop", ownerId);
 
     return () => {
       socket.off("new-job", handleNewJob);
+      socket.off("job-status-update", handleJobStatusUpdate);
     };
   }, [ownerId, fetchJobs]);
 
