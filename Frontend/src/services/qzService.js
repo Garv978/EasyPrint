@@ -248,6 +248,7 @@ const createPrintConfig = ({
   sides,
   layout,
   color,
+  pagesPerSheet,
 }) => {
   if (!printerName) {
     throw new Error(
@@ -260,18 +261,27 @@ const createPrintConfig = ({
       ? Number(copies)
       : 1;
 
-  const duplex =
-    sides === "Double-sided"
+  const normalizedPagesPerSheet =
+    [1, 2, 4, 6, 9, 16].includes(
+      Number(pagesPerSheet)
+    )
+      ? Number(pagesPerSheet)
+      : 1;
+
+  const normalizedSides =
+    String(sides).toLowerCase() === "double-sided" ||
+    String(sides).toLowerCase() === "double"
       ? "duplex"
       : "one-sided";
 
-  const orientation =
-    layout === "Landscape"
+  const normalizedLayout =
+    String(layout).toLowerCase() === "landscape" ||
+    String(layout).toLowerCase() === "landscape"
       ? "landscape"
       : "portrait";
 
-  const colorType =
-    color === "Color"
+  const normalizedColor =
+    String(color).toLowerCase() === "color"
       ? "color"
       : "blackwhite";
 
@@ -279,50 +289,233 @@ const createPrintConfig = ({
     printerName,
     {
       copies: normalizedCopies,
-
-      duplex,
-
-      orientation,
-
-      colorType,
-
+      duplex: normalizedSides,
+      orientation: normalizedLayout,
+      colorType: normalizedColor,
+      nUp: normalizedPagesPerSheet,
+      pagesPerSheet: normalizedPagesPerSheet,
       jobName: `EasyPrint-${Date.now()}`,
-
       scaleContent: true,
     }
   );
 };
 
 /**
- * Build the PDF print data.
+ * Fetch the actual document bytes from Cloudinary and convert them into
+ * the format QZ Tray accepts for printing.
  */
-const createPdfPrintData = ({
+const fetchCloudinaryDocument = async ({ fileUrl, jobId, documentIndex }) => {
+  if (!fileUrl) {
+    throw new Error(
+      "No document URL is available for this job."
+    );
+  }
+
+  try {
+    let documentUrl = fileUrl;
+
+    if (jobId && Number.isInteger(documentIndex)) {
+      const urlResponse = await fetch(
+        `${API.defaults.baseURL}/qz/document/${jobId}/${documentIndex}`,
+        {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        },
+      );
+
+      if (!urlResponse.ok) {
+        throw new Error(
+          `Unable to authorize document download (${urlResponse.status}).`,
+        );
+      }
+
+      const urlPayload = await urlResponse.json();
+      documentUrl = urlPayload.url;
+    }
+
+    const response = await fetch(documentUrl, {
+      method: "GET",
+      cache: "no-store",
+      credentials: "omit",
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Cloudinary fetch failed (${response.status}).`
+      );
+    }
+
+    const blob = await response.blob();
+    const contentType =
+      (blob.type || response.headers.get("content-type") || "")
+        .split(";")[0]
+        .trim()
+        .toLowerCase();
+
+    const supportedTypes = new Set([
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+    ]);
+
+    if (!supportedTypes.has(contentType)) {
+      throw new Error(
+        `Unsupported document type: ${contentType || "unknown"}`
+      );
+    }
+
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const result = reader.result;
+
+        if (typeof result !== "string") {
+          reject(
+            new Error(
+              "Failed to convert document data to base64."
+            )
+          );
+          return;
+        }
+
+        const payload = result.includes(",")
+          ? result.split(",")[1]
+          : result;
+
+        resolve(payload);
+      };
+
+      reader.onerror = () => {
+        reject(
+          new Error(
+            "Failed to read the document data from Cloudinary."
+          )
+        );
+      };
+
+      reader.readAsDataURL(blob);
+    });
+
+    return {
+      mimeType: contentType,
+      base64,
+    };
+  } catch (error) {
+    console.error(
+      "CLOUDINARY FETCH FAILED:",
+      error
+    );
+
+    throw new Error(
+      error?.message ||
+        "Unable to fetch the document content from Cloudinary."
+    );
+  }
+};
+
+/**
+ * Normalize PDF page ranges before sending them to QZ Tray.
+ * Accepts values like "1-5" or "1-3,5-7" and rejects malformed ranges.
+ */
+const normalizePdfPageRange = (pageRange) => {
+  if (!pageRange) {
+    return null;
+  }
+
+  const trimmed = String(pageRange).trim();
+
+  if (!trimmed || trimmed === "All" || trimmed === "all") {
+    return null;
+  }
+
+  const normalized = trimmed.replace(/\s+/g, "");
+  const ranges = normalized.split(",");
+
+  const validatedRanges = ranges.map((rangePart) => {
+    if (!/^\d+-\d+$/.test(rangePart)) {
+      throw new Error(
+        "Invalid custom page range. Use format like 1-5 or 1-3,5-7."
+      );
+    }
+
+    const [start, end] = rangePart.split("-").map(Number);
+
+    if (
+      !Number.isInteger(start) ||
+      !Number.isInteger(end) ||
+      start < 1 ||
+      end < start
+    ) {
+      throw new Error(
+        "Invalid custom page range. Start must be >= 1 and end must be >= start."
+      );
+    }
+
+    return `${start}-${end}`;
+  });
+
+  return validatedRanges.join(",");
+};
+
+/**
+ * Build the QZ print data using the actual file bytes retrieved from Cloudinary.
+ */
+const createQzPrintData = async ({
   fileUrl,
+  jobId,
+  documentIndex,
   pageRange,
 }) => {
   if (!fileUrl) {
     throw new Error(
-      "No PDF file URL is available for this job."
+      "No document URL is available for this job."
     );
   }
 
-  const pdfData = {
-    type: "pixel",
-    format: "pdf",
-    flavor: "file",
-    data: fileUrl,
-  };
+  const { mimeType, base64 } = await fetchCloudinaryDocument({
+    fileUrl,
+    jobId,
+    documentIndex,
+  });
 
-  if (
-    pageRange &&
-    pageRange !== "All"
-  ) {
-    pdfData.options = {
-      pageRanges: pageRange,
+  if (mimeType === "application/pdf") {
+    const pdfData = {
+      type: "pixel",
+      format: "pdf",
+      flavor: "base64",
+      data: base64,
     };
+
+    const normalizedPageRange = normalizePdfPageRange(pageRange);
+
+    if (normalizedPageRange) {
+      pdfData.options = {
+        pageRanges: normalizedPageRange,
+      };
+    }
+
+    return [pdfData];
   }
 
-  return [pdfData];
+  if (
+    mimeType === "image/jpeg" ||
+    mimeType === "image/png"
+  ) {
+    return [
+      {
+        type: "pixel",
+        format: "image",
+        flavor: "base64",
+        data: `data:${mimeType};base64,${base64}`,
+      },
+    ];
+  }
+
+  throw new Error(
+    `Unsupported document type: ${mimeType || "unknown"}`
+  );
 };
 
 /**
@@ -337,16 +530,21 @@ const createPdfPrintData = ({
 export const printPdfDocument =
   async ({
     printerName,
+    jobId,
+    documentIndex,
     fileUrl,
     copies,
     sides,
     layout,
     color,
     pageRange,
+    pagesPerSheet,
+    pageSelection,
+    customPages,
   }) => {
     if (!fileUrl) {
       throw new Error(
-        "No PDF file URL is available for this job."
+        "No document URL is available for this job."
       );
     }
 
@@ -356,12 +554,6 @@ export const printPdfDocument =
     } =
       await connectQzAndListPrinters();
 
-    /*
-     * If DocumentCard supplied a printer,
-     * use it.
-     *
-     * Otherwise use the first printer found.
-     */
     const selectedPrinter =
       printerName || printers[0];
 
@@ -385,12 +577,19 @@ export const printPdfDocument =
         sides,
         layout,
         color,
+        pagesPerSheet,
       });
 
+    const resolvedPageRange =
+      pageRange ||
+      (pageSelection === "Custom" && customPages ? customPages : "All");
+
     const printData =
-      createPdfPrintData({
+      await createQzPrintData({
         fileUrl,
-        pageRange,
+        jobId,
+        documentIndex,
+        pageRange: resolvedPageRange,
       });
 
     console.log(
@@ -401,12 +600,15 @@ export const printPdfDocument =
         sides,
         layout,
         color,
-        pageRange,
+        pageRange: resolvedPageRange,
+        pagesPerSheet,
+        pageSelection,
+        customPages,
       }
     );
 
     console.log(
-      "SENDING PDF TO PRINTER..."
+      "SENDING DOCUMENT TO PRINTER..."
     );
 
     try {

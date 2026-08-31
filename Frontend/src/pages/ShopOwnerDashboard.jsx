@@ -58,11 +58,11 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
           };
         }
 
-        (job.documents ?? []).forEach((document) => {
+        (job.documents ?? []).forEach((document, documentIndex) => {
           customerMap[userId].documents.push({
             id: `${job._id}-${document._id}`,
             jobId: job._id,
-            documentId: document._id,
+            documentIndex,
             fileName: document.fileName,
             pages: document.pages ?? 0,
             chargedPages: document.chargedPages ?? 0,
@@ -79,6 +79,10 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
               job.printOptions?.layout === "Landscape"
                 ? "landscape"
                 : "portrait",
+
+            pagesPerSheet: job.printOptions?.pagesPerSheet ?? 1,
+            pageSelection: job.printOptions?.pageSelection ?? "All Pages",
+            customPages: job.printOptions?.customPages ?? "",
 
             range:
               job.printOptions?.pageSelection === "Custom"

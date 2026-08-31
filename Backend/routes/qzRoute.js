@@ -2,9 +2,56 @@ const express = require("express");
 
 const authMiddleware = require("../middlewares/authMiddleware");
 const ownerMiddleware = require("../middlewares/ownerMiddleware");
+const Job = require("../models/job");
+const cloudinary = require("../db/cloudinary");
 const { readQzCertificate, signQzRequest } = require("../services/qzSigningService");
 
 const qzRoutes = express.Router();
+
+qzRoutes.get(
+  "/qz/document/:jobId/:documentIndex",
+  authMiddleware,
+  ownerMiddleware,
+  async (req, res) => {
+    try {
+      const job = await Job.findOne({
+        _id: req.params.jobId,
+        shopId: req.user.ownerId,
+      }).select("documents");
+
+      const documentIndex = Number(req.params.documentIndex);
+      const document = Number.isInteger(documentIndex)
+        ? job?.documents[documentIndex]
+        : null;
+
+      if (!document) {
+        return res.status(404).json({
+          success: false,
+          message: "Document not found for this shop owner.",
+        });
+      }
+
+      const resourceType = "raw"
+      const versionMatch = new URL(document.fileUrl).pathname.match(/\/v(\d+)\//);
+
+      const signedUrl = cloudinary.url(document.cloudinaryPublicId, {
+        secure: true,
+        resource_type: resourceType,
+        type: "upload",
+        version: versionMatch?.[1],
+        sign_url: false,
+      });
+
+      return res.json({ success: true, url: signedUrl });
+    } catch (error) {
+      console.error("QZ document URL error:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to prepare the document for printing.",
+      });
+    }
+  },
+);
 
 qzRoutes.get(
   "/qz/certificate",

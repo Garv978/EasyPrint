@@ -77,6 +77,36 @@ export default function DocumentCard({ doc, idx }) {
   const [availablePrinters, setAvailablePrinters] = useState([]);
   const [selectedPrinter, setSelectedPrinter] = useState("");
   const [printerError, setPrinterError] = useState("");
+  const [isRefreshingPrinters, setIsRefreshingPrinters] = useState(false);
+
+  const refreshPrinters = async () => {
+    try {
+      setIsRefreshingPrinters(true);
+      setPrinterError("");
+
+      const { printers } = await connectQzAndListPrinters();
+
+      if (!printers.length) {
+        setAvailablePrinters([]);
+        setSelectedPrinter("");
+        setPrinterState("printer-unavailable");
+        setPrinterError("No local printers were found.");
+        return;
+      }
+
+      setAvailablePrinters(printers);
+      setSelectedPrinter((current) => current || printers[0]);
+      setPrinterState("idle");
+    } catch (error) {
+      console.error("REFRESH PRINTERS ERROR:", error);
+      setAvailablePrinters([]);
+      setSelectedPrinter("");
+      setPrinterState("not-installed");
+      setPrinterError(error.message || "Unable to refresh printers.");
+    } finally {
+      setIsRefreshingPrinters(false);
+    }
+  };
 
   const handlePrint = async () => {
     try {
@@ -111,11 +141,16 @@ export default function DocumentCard({ doc, idx }) {
 
       await printPdfDocument({
         printerName,
+        jobId: doc.jobId,
+        documentIndex: doc.documentIndex,
         fileUrl: doc.fileUrl,
         copies: doc.copies,
         sides: doc.sides,
         layout: doc.layout,
         color: doc.color,
+        pagesPerSheet: doc.pagesPerSheet,
+        pageSelection: doc.pageSelection,
+        customPages: doc.customPages,
         pageRange: doc.range === "All" ? "" : doc.range,
       });
 
@@ -184,15 +219,9 @@ export default function DocumentCard({ doc, idx }) {
 
               <span className="flex items-center gap-1">
                 {doc.layout === "landscape" ? (
-                  <RectangleHorizontal
-                    size={12}
-                    className="text-emerald-400"
-                  />
+                  <RectangleHorizontal size={12} className="text-emerald-400" />
                 ) : (
-                  <RectangleVertical
-                    size={12}
-                    className="text-emerald-400"
-                  />
+                  <RectangleVertical size={12} className="text-emerald-400" />
                 )}
 
                 {doc.layout === "landscape" ? "Landscape" : "Portrait"}
@@ -238,25 +267,47 @@ export default function DocumentCard({ doc, idx }) {
           <span className="font-medium text-gray-600">Printer:</span>
 
           {availablePrinters.length > 0 ? (
-            <select
-              value={selectedPrinter}
-              onChange={(event) => setSelectedPrinter(event.target.value)}
-              className="rounded-lg border border-emerald-200 bg-white px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-            >
-              {availablePrinters.map((printer) => (
-                <option key={printer} value={printer}>
-                  {printer}
-                </option>
-              ))}
-            </select>
+            <>
+              <select
+                value={selectedPrinter}
+                onChange={(event) => setSelectedPrinter(event.target.value)}
+                className="rounded-lg border border-emerald-200 bg-white px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+              >
+                {availablePrinters.map((printer) => (
+                  <option key={printer} value={printer}>
+                    {printer}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                onClick={refreshPrinters}
+                disabled={isRefreshingPrinters}
+                className="rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1.5 text-[11px] font-medium text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isRefreshingPrinters ? "Refreshing..." : "Refresh"}
+              </button>
+            </>
           ) : (
-            <span className="text-gray-400">
-              {printerState === "not-installed"
-                ? "QZ Tray not running"
-                : printerState === "printer-unavailable"
-                  ? "Printer unavailable"
-                  : "Click Print to connect"}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400">
+                {printerState === "not-installed"
+                  ? "QZ Tray not running"
+                  : printerState === "printer-unavailable"
+                    ? "Printer unavailable"
+                    : "Click Print to connect"}
+              </span>
+
+              <button
+                type="button"
+                onClick={refreshPrinters}
+                disabled={isRefreshingPrinters}
+                className="rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1.5 text-[11px] font-medium text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isRefreshingPrinters ? "Refreshing..." : "Refresh"}
+              </button>
+            </div>
           )}
         </div>
 

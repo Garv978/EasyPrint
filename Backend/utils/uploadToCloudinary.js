@@ -4,7 +4,7 @@ const uploadToCloudinary = (fileBuffer, fileName) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        resource_type: "auto",
+        resource_type: "raw",
         folder: "print-shop-documents",
         public_id: `${Date.now()}-${fileName}`,
       },
