@@ -277,7 +277,6 @@ const createPrintConfig = ({
       : "one-sided";
 
   const normalizedLayout =
-    String(layout).toLowerCase() === "landscape" ||
     String(layout).toLowerCase() === "landscape"
       ? "landscape"
       : "portrait";

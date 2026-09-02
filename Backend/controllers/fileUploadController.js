@@ -146,14 +146,18 @@ const uploadFiles = async (req, res) => {
 
     // Notify shop owner through Socket.IO
     const io = req.app.get("io");
-
     if (io) {
+      // Notify shop owner
       io.to(`shop-${shop._id}`).emit("new-job", job);
+
+      // Notify the user who created the job
+      io.to(`user-${userId}`).emit("job-created", job);
     }
 
     return res.status(201).json({
       success: true,
       message: "Files uploaded successfully",
+      job,
       fileNames: uploadedFiles.map(
         (file) => file.fileName,
       ),

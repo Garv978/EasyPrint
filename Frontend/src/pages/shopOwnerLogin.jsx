@@ -73,7 +73,11 @@ const ShopOwnerLogin = () => {
         ColoredRate: Number(ColoredRate),
       };
 
-      await googleOwnerAuth(credentialResponse.credential, shopDetails, mode);
+      await googleOwnerAuth(
+        credentialResponse.credential,
+        shopDetails,
+        mode
+      );
 
       window.dispatchEvent(new Event("authChange"));
 
@@ -90,7 +94,7 @@ const ShopOwnerLogin = () => {
         setStep(1);
         toast.dismiss("login");
         toast.error(
-          "Owner not registered. Fill your shop details to register.",
+          "Owner not registered. Fill your shop details to register."
         );
         return;
       }
@@ -100,7 +104,7 @@ const ShopOwnerLogin = () => {
           "This email is already registered. Please sign in instead.",
           {
             id: "login",
-          },
+          }
         );
         setStep(1);
         return;
@@ -196,11 +200,15 @@ const ShopOwnerLogin = () => {
               <div className="space-y-5">
                 {/* Shop Name */}
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  <label
+                    htmlFor="shopName"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
+                  >
                     Shop Name
                   </label>
 
                   <input
+                    id="shopName"
                     name="shopName"
                     type="text"
                     value={formData.shopName}
@@ -212,7 +220,10 @@ const ShopOwnerLogin = () => {
 
                 {/* Phone */}
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                  <label
+                    htmlFor="phoneNo"
+                    className="mb-2 block text-sm font-semibold text-slate-700"
+                  >
                     Phone Number
                   </label>
 
@@ -222,6 +233,7 @@ const ShopOwnerLogin = () => {
                     </div>
 
                     <input
+                      id="phoneNo"
                       name="phoneNo"
                       type="tel"
                       maxLength={10}
@@ -237,7 +249,10 @@ const ShopOwnerLogin = () => {
                 <div className="grid grid-cols-2 gap-4">
                   {/* B&W */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label
+                      htmlFor="BWRate"
+                      className="mb-2 block text-sm font-semibold text-slate-700"
+                    >
                       B&W Rate
                     </label>
 
@@ -247,6 +262,7 @@ const ShopOwnerLogin = () => {
                       </span>
 
                       <input
+                        id="BWRate"
                         name="BWRate"
                         type="number"
                         min="0"
@@ -261,7 +277,10 @@ const ShopOwnerLogin = () => {
 
                   {/* Color */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label
+                      htmlFor="ColoredRate"
+                      className="mb-2 block text-sm font-semibold text-slate-700"
+                    >
                       Color Rate
                     </label>
 
@@ -271,6 +290,7 @@ const ShopOwnerLogin = () => {
                       </span>
 
                       <input
+                        id="ColoredRate"
                         name="ColoredRate"
                         type="number"
                         min="0"

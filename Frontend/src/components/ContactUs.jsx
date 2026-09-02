@@ -59,13 +59,16 @@ const ContactUs = () => {
         {/* Right Side - Form */}
         <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8 w-full max-w-md mx-auto md:mx-0">
           <form onSubmit={handleSubmit} className="space-y-5">
-
             {/* Full Name */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label
+                htmlFor="firstName"
+                className="block text-sm font-medium text-slate-700 mb-1.5"
+              >
                 Full Name
               </label>
               <input
+                id="firstName"
                 type="text"
                 name="firstName"
                 value={form.firstName}
@@ -77,10 +80,14 @@ const ContactUs = () => {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-slate-700 mb-1.5"
+              >
                 Email Address
               </label>
               <input
+                id="email"
                 type="email"
                 name="email"
                 value={form.email}
@@ -92,10 +99,14 @@ const ContactUs = () => {
 
             {/* Message */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label
+                htmlFor="message"
+                className="block text-sm font-medium text-slate-700 mb-1.5"
+              >
                 Message
               </label>
               <textarea
+                id="message"
                 rows="4"
                 name="message"
                 value={form.message}
@@ -114,9 +125,7 @@ const ContactUs = () => {
             </button>
 
             {status && (
-              <p className="text-center text-sm text-slate-600">
-                {status}
-              </p>
+              <p className="text-center text-sm text-slate-600">{status}</p>
             )}
           </form>
         </div>

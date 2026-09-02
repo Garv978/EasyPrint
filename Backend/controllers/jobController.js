@@ -55,6 +55,35 @@ const getMyJobs = async (req, res) => {
   }
 };
 
+const getMyUserJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find({
+      userId: req.user.userId,
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate",
+    );
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+
+    return res.status(200).json({
+      success: true,
+      jobs,
+    });
+  } catch (error) {
+    console.error("GET USER JOBS ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
 const updatePricing = async (req, res) => {
   try {
     const { BWRate, ColoredRate } = req.body;
@@ -173,11 +202,23 @@ const updatePrintStatus = async (req, res) => {
     const io = req.app.get("io");
 
     if (io) {
-      io.to(`shop-${job.shopId}`).emit("job-status-update", {
+      const statusUpdate = {
         jobId: job._id,
         status: job.status,
         errorMessage: job.errorMessage,
-      });
+      };
+
+      // Update shop owner
+      io.to(`shop-${job.shopId}`).emit(
+        "job-status-update",
+        statusUpdate,
+      );
+
+      // Update the customer who owns this job
+      io.to(`user-${job.userId}`).emit(
+        "job-status-update",
+        statusUpdate,
+      );
     }
 
     return res.status(200).json({
@@ -197,6 +238,7 @@ const updatePrintStatus = async (req, res) => {
 module.exports = {
   checkShop,
   getMyJobs,
+  getMyUserJobs,
   updatePricing,
   getPricing,
   updatePrintStatus,

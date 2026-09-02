@@ -7,6 +7,7 @@ const ownerMiddleware = require("../middlewares/ownerMiddleware");
 const {
   checkShop,
   getMyJobs,
+  getMyUserJobs,
   updatePricing,
   getPricing,
   updatePrintStatus,
@@ -19,6 +20,12 @@ jobRoutes.get(
   authMiddleware,
   ownerMiddleware,
   getMyJobs
+);
+
+jobRoutes.get(
+  "/user/get-my-jobs",
+  authMiddleware,
+  getMyUserJobs,
 );
 
 jobRoutes.put(

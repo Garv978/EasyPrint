@@ -70,7 +70,11 @@ app.set("io", io);
 
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
-
+  
+  if (socket.user?.userId) {
+    socket.join(`user-${socket.user.userId}`);
+  }
+  
   socket.on("join-shop", (shopId) => {
     socket.join(`shop-${shopId}`);
 
