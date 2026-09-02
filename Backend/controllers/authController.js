@@ -44,10 +44,7 @@ const googleUserAuth = async (req, res) => {
 
     const payload = await verifyGoogleToken(token);
 
-    const {
-      sub: googleId,
-      email,
-    } = payload;
+    const { sub: googleId, email } = payload;
 
     const fullName = buildFullName(payload);
 
@@ -95,10 +92,7 @@ const googleOwnerAuth = async (req, res) => {
 
     const payload = await verifyGoogleToken(token);
 
-    const {
-      sub: googleId,
-      email,
-    } = payload;
+    const { sub: googleId, email } = payload;
 
     const fullName = buildFullName(payload);
 
@@ -126,7 +120,7 @@ const googleOwnerAuth = async (req, res) => {
         typeof shopName === "string" &&
         typeof phoneNo === "string" &&
         shopName.trim() &&
-        /^[0-9]{10}$/.test(phoneNo.trim()) &&
+        /^\d{10}$/.test(phoneNo.trim()) &&
         Number.isFinite(Number(BWRate)) &&
         Number.isFinite(Number(ColoredRate)) &&
         Number(BWRate) >= 0 &&
@@ -183,7 +177,7 @@ const getCurrentUser = async (req, res) => {
 
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
     );
 
     if (decoded.role === "user") {
@@ -222,6 +216,8 @@ const getCurrentUser = async (req, res) => {
       loggedIn: false,
     });
   } catch (error) {
+    console.error("GET CURRENT USER ERROR:", error);
+
     return res.status(401).json({
       loggedIn: false,
     });

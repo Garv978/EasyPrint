@@ -18,7 +18,10 @@ const verifyGoogleToken = async (credential) => {
     return payload;
   } catch (error) {
     console.error("Google token verification failed:", error.message);
-    throw new Error("Invalid Google token");
+
+    throw new Error("Invalid Google token", {
+      cause: error,
+    });
   }
 };
 

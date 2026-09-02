@@ -9,6 +9,7 @@ const FeedbackSchema = new mongoose.Schema(
       minlength: 2,
       maxlength: 50,
     },
+
     lastName: {
       type: String,
       required: [true, "Last name is required"],
@@ -16,13 +17,28 @@ const FeedbackSchema = new mongoose.Schema(
       minlength: 2,
       maxlength: 50,
     },
+
     email: {
       type: String,
       required: [true, "Email is required"],
       trim: true,
       lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
+      validate: {
+        validator: (email) => {
+          const atIndex = email.indexOf("@");
+          const dotIndex = email.lastIndexOf(".");
+
+          return (
+            atIndex > 0 &&
+            dotIndex > atIndex + 1 &&
+            dotIndex < email.length - 1 &&
+            !email.includes(" ")
+          );
+        },
+        message: "Please enter a valid email",
+      },
     },
+
     message: {
       type: String,
       required: [true, "Message is required"],
@@ -31,7 +47,7 @@ const FeedbackSchema = new mongoose.Schema(
       maxlength: 2000,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Feedback", FeedbackSchema);

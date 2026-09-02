@@ -6,7 +6,24 @@ const checkShop = async (req, res) => {
   try {
     const { shopCode } = req.query;
 
-    const shop = await ShopOwner.findOne({ shopCode });
+    // Validate and sanitize user-controlled shop code before querying MongoDB.
+    if (
+      typeof shopCode !== "string" ||
+      shopCode.length === 0 ||
+      shopCode.length > 100 ||
+      !/^[A-Za-z0-9_-]+$/.test(shopCode)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid shop code",
+      });
+    }
+
+    const normalizedShopCode = shopCode.trim();
+
+    const shop = await ShopOwner.findOne({
+      shopCode: normalizedShopCode,
+    }).select("_id");
 
     if (!shop) {
       return res.status(404).json({
@@ -37,7 +54,10 @@ const getMyJobs = async (req, res) => {
       .sort({ createdAt: -1 });
 
     // Never cache the owner's current jobs
-    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate",
+    );
     res.set("Pragma", "no-cache");
     res.set("Expires", "0");
 
@@ -95,6 +115,18 @@ const updatePricing = async (req, res) => {
       });
     }
 
+    if (
+      typeof BWRate !== "number" ||
+      typeof ColoredRate !== "number" ||
+      !Number.isFinite(BWRate) ||
+      !Number.isFinite(ColoredRate)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Prices must be valid numbers",
+      });
+    }
+
     if (BWRate < 0 || ColoredRate < 0) {
       return res.status(400).json({
         success: false,
@@ -111,7 +143,7 @@ const updatePricing = async (req, res) => {
       {
         new: true,
         runValidators: true,
-      }
+      },
     );
 
     if (!shopOwner) {
@@ -129,7 +161,6 @@ const updatePricing = async (req, res) => {
         ColoredRate: shopOwner.ColoredRate,
       },
     });
-
   } catch (error) {
     console.error("UPDATE PRICING ERROR:", error);
 
@@ -142,8 +173,9 @@ const updatePricing = async (req, res) => {
 
 const getPricing = async (req, res) => {
   try {
-    const shopOwner = await ShopOwner.findById(req.user.ownerId)
-      .select("BWRate ColoredRate");
+    const shopOwner = await ShopOwner.findById(req.user.ownerId).select(
+      "BWRate ColoredRate",
+    );
 
     if (!shopOwner) {
       return res.status(404).json({
@@ -159,7 +191,6 @@ const getPricing = async (req, res) => {
         ColoredRate: shopOwner.ColoredRate,
       },
     });
-
   } catch (error) {
     console.error("GET PRICING ERROR:", error);
 
@@ -174,6 +205,7 @@ const updatePrintStatus = async (req, res) => {
   try {
     const { jobId } = req.params;
     const { status, errorMessage = "" } = req.body;
+
     const validStatuses = ["Printing", "Completed", "Failed"];
 
     if (!validStatuses.includes(status)) {
@@ -196,7 +228,11 @@ const updatePrintStatus = async (req, res) => {
     }
 
     job.status = status;
-    job.errorMessage = status === "Failed" ? (errorMessage || "Print failed.") : "";
+    job.errorMessage =
+      status === "Failed"
+        ? errorMessage || "Print failed."
+        : "";
+
     await job.save();
 
     const io = req.app.get("io");
