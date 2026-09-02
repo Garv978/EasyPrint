@@ -178,7 +178,8 @@ export const connectQz = async () => {
     );
 
     throw new Error(
-      "Unable to connect to QZ Tray. Make sure the QZ Tray desktop application is installed and running."
+      "Unable to connect to QZ Tray. Make sure the QZ Tray desktop application is installed and running.",
+      {cause:error}
     );
   }
 };
@@ -213,7 +214,8 @@ export const listPrinters = async () => {
     );
 
     throw new Error(
-      "QZ Tray connected, but the available printers could not be retrieved."
+      "QZ Tray connected, but the available printers could not be retrieved.",
+        { cause: error }
     );
   }
 };
@@ -410,7 +412,8 @@ const fetchCloudinaryDocument = async ({ fileUrl, jobId, documentIndex }) => {
 
     throw new Error(
       error?.message ||
-        "Unable to fetch the document content from Cloudinary."
+        "Unable to fetch the document content from Cloudinary.",
+          { cause: error }
     );
   }
 };
@@ -630,7 +633,8 @@ export const printPdfDocument =
 
       throw new Error(
         error?.message ||
-          "QZ Tray failed to send the document to the printer."
+          "QZ Tray failed to send the document to the printer.",
+            { cause: error }
       );
     }
   };
