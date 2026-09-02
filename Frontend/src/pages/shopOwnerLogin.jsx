@@ -20,6 +20,7 @@ const ShopOwnerLogin = () => {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -37,7 +38,7 @@ const ShopOwnerLogin = () => {
       return;
     }
 
-    if (!/^[0-9]{10}$/.test(phoneNo.trim())) {
+    if (!/^\d{10}$/.test(phoneNo.trim())) {
       toast.error("Please enter a valid 10-digit phone number");
       return;
     }
@@ -76,7 +77,7 @@ const ShopOwnerLogin = () => {
       await googleOwnerAuth(
         credentialResponse.credential,
         shopDetails,
-        mode
+        mode,
       );
 
       window.dispatchEvent(new Event("authChange"));
@@ -94,7 +95,7 @@ const ShopOwnerLogin = () => {
         setStep(1);
         toast.dismiss("login");
         toast.error(
-          "Owner not registered. Fill your shop details to register."
+          "Owner not registered. Fill your shop details to register.",
         );
         return;
       }
@@ -104,7 +105,7 @@ const ShopOwnerLogin = () => {
           "This email is already registered. Please sign in instead.",
           {
             id: "login",
-          }
+          },
         );
         setStep(1);
         return;
@@ -201,6 +202,7 @@ const ShopOwnerLogin = () => {
                 {/* Shop Name */}
                 <div>
                   <label
+                    id="shopName-label"
                     htmlFor="shopName"
                     className="mb-2 block text-sm font-semibold text-slate-700"
                   >
@@ -209,11 +211,13 @@ const ShopOwnerLogin = () => {
 
                   <input
                     id="shopName"
+                    aria-labelledby="shopName-label"
                     name="shopName"
                     type="text"
                     value={formData.shopName}
                     onChange={handleInputChange}
                     placeholder="Enter your shop name"
+                    autoComplete="organization"
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-3.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
                   />
                 </div>
@@ -221,6 +225,7 @@ const ShopOwnerLogin = () => {
                 {/* Phone */}
                 <div>
                   <label
+                    id="phoneNo-label"
                     htmlFor="phoneNo"
                     className="mb-2 block text-sm font-semibold text-slate-700"
                   >
@@ -228,18 +233,23 @@ const ShopOwnerLogin = () => {
                   </label>
 
                   <div className="flex overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
-                    <div className="flex items-center border-r border-slate-200 px-4 text-sm font-semibold text-slate-500">
+                    <div
+                      aria-hidden="true"
+                      className="flex items-center border-r border-slate-200 px-4 text-sm font-semibold text-slate-500"
+                    >
                       +91
                     </div>
 
                     <input
                       id="phoneNo"
+                      aria-labelledby="phoneNo-label"
                       name="phoneNo"
                       type="tel"
                       maxLength={10}
                       value={formData.phoneNo}
                       onChange={handleInputChange}
                       placeholder="Enter 10-digit number"
+                      autoComplete="tel"
                       className="w-full bg-transparent px-4 py-3.5 text-sm text-slate-900 outline-none placeholder:text-slate-400"
                     />
                   </div>
@@ -250,6 +260,7 @@ const ShopOwnerLogin = () => {
                   {/* B&W */}
                   <div>
                     <label
+                      id="BWRate-label"
                       htmlFor="BWRate"
                       className="mb-2 block text-sm font-semibold text-slate-700"
                     >
@@ -257,12 +268,16 @@ const ShopOwnerLogin = () => {
                     </label>
 
                     <div className="flex overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
-                      <span className="flex items-center border-r border-slate-200 px-3 text-sm font-semibold text-slate-500">
+                      <span
+                        aria-hidden="true"
+                        className="flex items-center border-r border-slate-200 px-3 text-sm font-semibold text-slate-500"
+                      >
                         ₹
                       </span>
 
                       <input
                         id="BWRate"
+                        aria-labelledby="BWRate-label"
                         name="BWRate"
                         type="number"
                         min="0"
@@ -278,6 +293,7 @@ const ShopOwnerLogin = () => {
                   {/* Color */}
                   <div>
                     <label
+                      id="ColoredRate-label"
                       htmlFor="ColoredRate"
                       className="mb-2 block text-sm font-semibold text-slate-700"
                     >
@@ -285,12 +301,16 @@ const ShopOwnerLogin = () => {
                     </label>
 
                     <div className="flex overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition-all focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
-                      <span className="flex items-center border-r border-slate-200 px-3 text-sm font-semibold text-slate-500">
+                      <span
+                        aria-hidden="true"
+                        className="flex items-center border-r border-slate-200 px-3 text-sm font-semibold text-slate-500"
+                      >
                         ₹
                       </span>
 
                       <input
                         id="ColoredRate"
+                        aria-labelledby="ColoredRate-label"
                         name="ColoredRate"
                         type="number"
                         min="0"
@@ -351,7 +371,12 @@ const ShopOwnerLogin = () => {
                 <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-slate-50 to-white p-6">
                   {/* Google Icon */}
                   <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-md ring-1 ring-slate-100">
-                    <svg width="27" height="27" viewBox="0 0 24 24">
+                    <svg
+                      width="27"
+                      height="27"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
                       <path
                         fill="#4285F4"
                         d="M21.35 12.27c0-.72-.06-1.41-.18-2.07H12v3.91h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.23z"
@@ -411,7 +436,10 @@ const ShopOwnerLogin = () => {
                       </p>
                     </div>
 
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm">
+                    <div
+                      aria-hidden="true"
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm"
+                    >
                       ✓
                     </div>
                   </div>

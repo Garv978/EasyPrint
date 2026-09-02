@@ -1,5 +1,5 @@
-import { submitFeedback } from "../services/FeedbackServices";
 import { useState } from "react";
+import { submitFeedback } from "../services/FeedbackServices";
 
 const ContactUs = () => {
   const [form, setForm] = useState({
@@ -12,7 +12,10 @@ const ContactUs = () => {
   const [status, setStatus] = useState("");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -21,7 +24,9 @@ const ContactUs = () => {
 
     try {
       await submitFeedback(form);
+
       setStatus("✅ Feedback submitted successfully!");
+
       setForm({
         firstName: "",
         lastName: "",
@@ -29,7 +34,7 @@ const ContactUs = () => {
         message: "",
       });
     } catch (err) {
-      console.error(err);
+      console.error("FEEDBACK SUBMISSION ERROR:", err);
       setStatus("❌ Failed to submit feedback.");
     }
   };
@@ -47,12 +52,12 @@ const ContactUs = () => {
           </span>
 
           <h2 className="mt-4 text-4xl font-bold text-slate-900">
-            We'd Love to Hear From You
+            We&apos;d Love to Hear From You
           </h2>
 
           <p className="mt-4 text-slate-600 text-lg max-w-md">
             Have a question, suggestion, or need assistance? Fill out the form
-            and we'll get back to you as soon as possible.
+            and we&apos;ll get back to you as soon as possible.
           </p>
         </div>
 
@@ -67,6 +72,7 @@ const ContactUs = () => {
               >
                 Full Name
               </label>
+
               <input
                 id="firstName"
                 type="text"
@@ -74,6 +80,8 @@ const ContactUs = () => {
                 value={form.firstName}
                 onChange={handleChange}
                 placeholder="Enter your name"
+                autoComplete="name"
+                required
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition"
               />
             </div>
@@ -86,6 +94,7 @@ const ContactUs = () => {
               >
                 Email Address
               </label>
+
               <input
                 id="email"
                 type="email"
@@ -93,6 +102,8 @@ const ContactUs = () => {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="Enter your email"
+                autoComplete="email"
+                required
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition"
               />
             </div>
@@ -105,15 +116,17 @@ const ContactUs = () => {
               >
                 Message
               </label>
+
               <textarea
                 id="message"
-                rows="4"
                 name="message"
                 value={form.message}
                 onChange={handleChange}
                 placeholder="Write your message here..."
+                rows={4}
+                required
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none resize-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition"
-              ></textarea>
+              />
             </div>
 
             {/* Button */}
@@ -125,7 +138,13 @@ const ContactUs = () => {
             </button>
 
             {status && (
-              <p className="text-center text-sm text-slate-600">{status}</p>
+              <p
+                className="text-center text-sm text-slate-600"
+                role="status"
+                aria-live="polite"
+              >
+                {status}
+              </p>
             )}
           </form>
         </div>
