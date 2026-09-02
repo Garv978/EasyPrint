@@ -13,6 +13,7 @@
     "@react-oauth/google": "^0.13.5",
     "@tailwindcss/vite": "^4.3.3",
     "axios": "^1.18.1",
+    "browserslist": "^4.28.8",
     "html5-qrcode": "^2.3.8",
     "lucide-react": "^1.25.0",
     "qrcode.react": "^4.2.0",
