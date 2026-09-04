@@ -27,6 +27,10 @@ export const updatePrintStatus = async (jobId, status, errorMessage = "") => {
   });
 };
 
+export const deleteJob = async (jobId) => {
+  return API.delete(`/jobs/${jobId}`);
+};
+
 export const googleOwnerAuth = async (
   credential,
   shopDetails,

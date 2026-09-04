@@ -166,10 +166,6 @@ export const connectQz = async () => {
   try {
     await qz.websocket.connect();
 
-    console.log(
-      "QZ Tray connected successfully."
-    );
-
     return qz;
   } catch (error) {
     console.error(
@@ -200,11 +196,6 @@ export const listPrinters = async () => {
     )
       ? printers
       : [];
-
-    console.log(
-      "AVAILABLE PRINTERS:",
-      printerList
-    );
 
     return printerList;
   } catch (error) {
@@ -565,11 +556,6 @@ export const printPdfDocument =
       );
     }
 
-    console.log(
-      "SELECTED PRINTER:",
-      selectedPrinter
-    );
-
     const config =
       createPrintConfig({
         qzInstance,
@@ -594,33 +580,10 @@ export const printPdfDocument =
         pageRange: resolvedPageRange,
       });
 
-    console.log(
-      "PRINT CONFIG:",
-      {
-        printer: selectedPrinter,
-        copies,
-        sides,
-        layout,
-        color,
-        pageRange: resolvedPageRange,
-        pagesPerSheet,
-        pageSelection,
-        customPages,
-      }
-    );
-
-    console.log(
-      "SENDING DOCUMENT TO PRINTER..."
-    );
-
     try {
       await qzInstance.print(
         config,
         printData
-      );
-
-      console.log(
-        "PRINT REQUEST SENT SUCCESSFULLY"
       );
 
       return selectedPrinter;
@@ -657,9 +620,6 @@ export const disconnectQz =
     try {
       await qz.websocket.disconnect();
 
-      console.log(
-        "QZ Tray disconnected."
-      );
     } catch (error) {
       console.error(
         "QZ Tray disconnect failed:",

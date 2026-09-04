@@ -118,7 +118,7 @@ function QRScanner({ isOpen, onClose, onScanSuccess }) {
         setTorchSupported(Boolean(capabilities?.torch));
         setStatus("running");
       } catch (err) {
-        console.log("QRScanner: start error", err);
+        console.error("QRScanner: start error", err);
         if (!isMountedRef.current) return;
         const classified = classifyCameraError(err);
         setStatus(classified);
@@ -156,7 +156,7 @@ function QRScanner({ isOpen, onClose, onScanSuccess }) {
         await startScanner(devices[startIndex].id);
       } catch (err) {
         if (cancelled) return;
-        console.log("QRScanner: getCameras error", err);
+        console.error("QRScanner: getCameras error", err);
         const classified = classifyCameraError(err);
         setStatus(classified);
         if (classified === "error") setErrorMessage(describeCameraError(err));
@@ -189,7 +189,7 @@ function QRScanner({ isOpen, onClose, onScanSuccess }) {
       await scanner.applyVideoConstraints({ advanced: [{ torch: next }] });
       setTorchOn(next);
     } catch (err) {
-      console.log("QRScanner: torch toggle failed", err);
+      console.error("QRScanner: torch toggle failed", err);
     }
   };
 

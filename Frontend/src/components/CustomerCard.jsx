@@ -1,13 +1,16 @@
-import { ChevronDown, Trash2 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import DocumentCard from "./DocumentCard";
 
 export default function CustomerCard({
   customer,
   isOpen,
   toggleExpand,
-  deleteCustomer,
+  onDeleteJob,
 }) {
-  const customerTotal = customer.documents.reduce((sum, document) => sum + document.price,0,);
+  const customerTotal = customer.documents.reduce(
+    (sum, document) => sum + document.price,
+    0,
+  );
   return (
     <div className="bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
       {/* Row */}
@@ -43,13 +46,6 @@ export default function CustomerCard({
               className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
             />
           </button>
-          <button
-            onClick={() => deleteCustomer(customer.id)}
-            className="p-2 rounded-xl border border-red-100 text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors"
-            title="Remove customer"
-          >
-            <Trash2 size={15} />
-          </button>
         </div>
       </div>
 
@@ -61,6 +57,7 @@ export default function CustomerCard({
               key={doc.id}
               doc={doc}
               idx={idx}
+              onDeleteJob={onDeleteJob}
             />
           ))}
         </div>

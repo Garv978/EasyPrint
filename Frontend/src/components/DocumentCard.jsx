@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Check,
   Loader2,
+  Trash2,
 } from "lucide-react";
 
 import { updatePrintStatus } from "../services/OwnerServices";
@@ -32,7 +33,7 @@ const getButtonState = (state) => {
       className: "bg-emerald-600 hover:bg-emerald-700",
     },
     success: {
-      label: "Printed",
+      label: "Printed successfully",
       disabled: true,
       className: "bg-green-600 hover:bg-green-700",
     },
@@ -107,15 +108,9 @@ const DocumentDetails = ({ doc }) => (
 
     <span className="flex items-center gap-1">
       {doc.layout === "landscape" ? (
-        <RectangleHorizontal
-          size={12}
-          className="text-emerald-400"
-        />
+        <RectangleHorizontal size={12} className="text-emerald-400" />
       ) : (
-        <RectangleVertical
-          size={12}
-          className="text-emerald-400"
-        />
+        <RectangleVertical size={12} className="text-emerald-400" />
       )}
 
       {doc.layout === "landscape" ? "Landscape" : "Portrait"}
@@ -128,7 +123,15 @@ const DocumentDetails = ({ doc }) => (
   </div>
 );
 
-const DocumentHeader = ({ doc, idx, buttonState, printerState, onPrint }) => (
+const DocumentHeader = ({
+  doc,
+  idx,
+  buttonState,
+  printerState,
+  onPrint,
+  onDelete,
+  isDeleting,
+}) => (
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div className="flex items-start gap-3 min-w-0">
       <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-xs font-semibold text-emerald-600 shrink-0">
@@ -137,10 +140,7 @@ const DocumentHeader = ({ doc, idx, buttonState, printerState, onPrint }) => (
 
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
-          <FileText
-            size={14}
-            className="text-emerald-500 shrink-0"
-          />
+          <FileText size={14} className="text-emerald-500 shrink-0" />
 
           <p className="text-sm font-medium text-gray-800 truncate">
             {doc.fileName}
@@ -156,6 +156,17 @@ const DocumentHeader = ({ doc, idx, buttonState, printerState, onPrint }) => (
         <IndianRupee size={13} />
         {doc.price}
       </span>
+
+      <button
+        type="button"
+        onClick={onDelete}
+        disabled={isDeleting}
+        className="rounded-xl border border-red-100 p-2 text-red-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+        title="Delete job"
+        aria-label={`Delete ${doc.fileName}`}
+      >
+        <Trash2 size={15} />
+      </button>
 
       <button
         type="button"
@@ -205,9 +216,7 @@ const PrinterSelector = ({
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-gray-400">
-        {getPrinterMessage(printerState)}
-      </span>
+      <span className="text-gray-400">{getPrinterMessage(printerState)}</span>
 
       <RefreshButton
         isRefreshing={isRefreshingPrinters}
@@ -271,9 +280,7 @@ const PreviousError = ({ message }) => {
   }
 
   return (
-    <span className="text-xs text-red-500">
-      Previous error: {message}
-    </span>
+    <span className="text-xs text-red-500">Previous error: {message}</span>
   );
 };
 
@@ -292,12 +299,13 @@ const getPrintOptions = (doc, printerName) => ({
   pageRange: doc.range === "All" ? "" : doc.range,
 });
 
-export default function DocumentCard({ doc, idx }) {
+export default function DocumentCard({ doc, idx, onDeleteJob }) {
   const [printerState, setPrinterState] = useState("idle");
   const [availablePrinters, setAvailablePrinters] = useState([]);
   const [selectedPrinter, setSelectedPrinter] = useState("");
   const [printerError, setPrinterError] = useState("");
   const [isRefreshingPrinters, setIsRefreshingPrinters] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const refreshPrinters = async () => {
     setIsRefreshingPrinters(true);
@@ -391,10 +399,7 @@ export default function DocumentCard({ doc, idx }) {
       setPrinterError(error.message || "Printing failed.");
 
       try {
-        await updateJobStatus(
-          "Failed",
-          error.message || "Printing failed."
-        );
+        await updateJobStatus("Failed", error.message || "Printing failed.");
       } catch (statusError) {
         console.error("UPDATE PRINT STATUS ERROR:", statusError);
       }
@@ -402,6 +407,30 @@ export default function DocumentCard({ doc, idx }) {
   };
 
   const buttonState = getButtonState(printerState);
+
+  const handleDelete = async () => {
+    if (
+      !doc.jobId ||
+      isDeleting ||
+      !window.confirm(`Delete ${doc.fileName}?`)
+    ) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setPrinterError("");
+
+    try {
+      await onDeleteJob(doc.jobId);
+    } catch (error) {
+      console.error("DELETE JOB ERROR:", error);
+      setPrinterError(
+        error.response?.data?.message || "Unable to delete this job.",
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl border border-emerald-100 p-4 flex flex-col gap-4">
@@ -411,6 +440,8 @@ export default function DocumentCard({ doc, idx }) {
         buttonState={buttonState}
         printerState={printerState}
         onPrint={handlePrint}
+        onDelete={handleDelete}
+        isDeleting={isDeleting}
       />
 
       <PrinterSection

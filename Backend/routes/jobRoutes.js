@@ -11,6 +11,7 @@ const {
   updatePricing,
   getPricing,
   updatePrintStatus,
+  deleteJob,
 } = require("../controllers/jobController");
 
 jobRoutes.get("/checkShop", checkShop);
@@ -47,6 +48,13 @@ jobRoutes.patch(
   authMiddleware,
   ownerMiddleware,
   updatePrintStatus
+);
+
+jobRoutes.delete(
+  "/jobs/:jobId",
+  authMiddleware,
+  ownerMiddleware,
+  deleteJob
 );
 
 module.exports = jobRoutes;

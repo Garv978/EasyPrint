@@ -8,10 +8,8 @@ function GoogleAuth() {
 
   const handleLogin = async (credentialResponse) => {
     try {
-      console.log("requested reached");
       toast.loading("Signing you in...", { id: "login" });
       await googleUserAuth(credentialResponse.credential);
-      console.log("requested not found reached");
       window.dispatchEvent(new Event("authChange"));
 
       toast.success("Login successful 🎉", { id: "login" });

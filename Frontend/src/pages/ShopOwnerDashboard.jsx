@@ -5,6 +5,7 @@ import {
   getPricing,
   getMyJobs,
   updatePricing,
+  deleteJob,
 } from "../services/OwnerServices";
 
 import socket from "../socket";
@@ -33,11 +34,7 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
 
       const response = await getMyJobs();
 
-      console.log("GET MY JOBS RESPONSE:", response.data);
-
       const jobs = response.data?.jobs ?? [];
-
-      console.log("JOBS:", jobs);
 
       const customerMap = {};
 
@@ -193,14 +190,9 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
     setExpandedCustomer(expandedCustomer === customerId ? null : customerId);
   };
 
-  const deleteCustomer = (customerId) => {
-    setCustomers((prev) =>
-      prev.filter((customer) => customer.id !== customerId),
-    );
-
-    if (expandedCustomer === customerId) {
-      setExpandedCustomer(null);
-    }
+  const handleDeleteJob = async (jobId) => {
+    await deleteJob(jobId);
+    await fetchJobs();
   };
 
   return (
@@ -263,7 +255,7 @@ export default function ShopOwnerDashboard({ onLogout, owner }) {
                   customer={customer}
                   isOpen={isOpen}
                   toggleExpand={toggleExpand}
-                  deleteCustomer={deleteCustomer}
+                  onDeleteJob={handleDeleteJob}
                 />
               );
             })}

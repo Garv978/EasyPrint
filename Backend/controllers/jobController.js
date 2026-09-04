@@ -1,5 +1,6 @@
 const Job = require("../models/job");
 const ShopOwner = require("../models/shopOwner");
+const cloudinary = require("../db/cloudinary");
 
 // Check if shop exists
 const checkShop = async (req, res) => {
@@ -271,6 +272,49 @@ const updatePrintStatus = async (req, res) => {
   }
 };
 
+const deleteJob = async (req, res) => {
+  try {
+    const job = await Job.findOne({
+      _id: req.params.jobId,
+      shopId: req.user.ownerId,
+    });
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: "Job not found for this shop owner.",
+      });
+    }
+
+    await Promise.all(
+      job.documents.map(async (document) => {
+        if (!document.cloudinaryPublicId) {
+          return;
+        }
+
+        await cloudinary.uploader.destroy(document.cloudinaryPublicId, {
+          resource_type: "raw",
+          type: "upload",
+        });
+      }),
+    );
+
+    await Job.deleteOne({ _id: job._id });
+
+    return res.status(200).json({
+      success: true,
+      message: "Job deleted successfully.",
+    });
+  } catch (error) {
+    console.error("DELETE JOB ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to delete job and its files.",
+    });
+  }
+};
+
 module.exports = {
   checkShop,
   getMyJobs,
@@ -278,4 +322,5 @@ module.exports = {
   updatePricing,
   getPricing,
   updatePrintStatus,
+  deleteJob,
 };
