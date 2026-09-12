@@ -22,6 +22,12 @@ function Hero({ loggedIn, onLogout }) {
   };
 
   const handleCode = async (shopCode) => {
+    if (!loggedIn) {
+      setIsScannerOpen(false);
+      toast.error("Please log in first");
+      return;
+    }
+
     try {
       const response = await API.get("/checkShop", {
         params: {
